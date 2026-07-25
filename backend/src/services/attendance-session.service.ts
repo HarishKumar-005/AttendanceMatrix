@@ -39,11 +39,24 @@ export class AttendanceSessionService {
   public async getSession(query: GetSessionQueryInput): Promise<AttendanceSessionResult> {
     const { class_section, date } = query;
 
+    // Construct variations to match any DB representation: e.g. "Class 10-A", "10-A", "10A"
+    const rawClean = class_section.replace(/^Class\s*/i, '').trim();
+    const noHyphen = rawClean.replace('-', '');
+    const withHyphen = rawClean.includes('-') ? rawClean : rawClean.replace(/([0-9]+)([A-Z])/i, '$1-$2');
+    const classVariants = Array.from(new Set([
+      class_section,
+      rawClean,
+      noHyphen,
+      withHyphen,
+      `Class ${rawClean}`,
+      `Class ${withHyphen}`
+    ]));
+
     // 1. Fetch enrolled active students for this class section
     const { data: students, error: studentsError } = await supabase
       .from('students')
       .select('*')
-      .eq('current_class_section', class_section)
+      .in('current_class_section', classVariants)
       .eq('is_active', true)
       .order('full_name');
 
@@ -58,8 +71,9 @@ export class AttendanceSessionService {
     const { data: records, error: recordsError } = await supabase
       .from('attendance_records')
       .select('*')
-      .eq('class_section', class_section)
+      .in('class_section', classVariants)
       .eq('attendance_date', date);
+
 
     if (recordsError) {
       console.error('[AttendanceSessionService.getSession] Failed to fetch records:', recordsError);

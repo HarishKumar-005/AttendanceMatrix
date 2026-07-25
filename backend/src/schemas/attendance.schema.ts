@@ -36,13 +36,19 @@ export const studentIdParamSchema = z.object({
 export const getRecordsQuerySchema = z.object({
   student_id: z.string().optional(),
   class_section: z.string().optional(),
-  status: attendanceStatusEnum.optional(),
+  classSection: z.string().optional(),
+  status: z.string().optional(),
   start_date: z.string().optional(),
+  startDate: z.string().optional(),
   end_date: z.string().optional(),
+  endDate: z.string().optional(),
   search: z.string().optional(),
+  isDefaulter: z.string().optional(),
+  is_defaulter: z.string().optional(),
   page: z.string().optional().transform((val) => (val ? parseInt(val, 10) : 1)),
   limit: z.string().optional().transform((val) => (val ? parseInt(val, 10) : 20)),
 });
+
 
 export const getSessionQuerySchema = z.object({
   class_section: z.string({ required_error: 'class_section is required' }).min(1, 'class_section cannot be blank'),

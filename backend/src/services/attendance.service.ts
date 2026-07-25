@@ -32,22 +32,56 @@ export class AttendanceService {
     if (query.student_id) {
       dbQuery = dbQuery.eq('student_id', query.student_id);
     }
-    if (query.class_section) {
-      dbQuery = dbQuery.eq('class_section', query.class_section);
+    const classSectionParam = query.class_section || (query as unknown as Record<string, string>).classSection;
+    if (classSectionParam && classSectionParam !== 'ALL') {
+      const rawClean = classSectionParam.replace(/^Class\s*/i, '').trim();
+      const noHyphen = rawClean.replace('-', '');
+      const withHyphen = rawClean.includes('-') ? rawClean : rawClean.replace(/([0-9]+)([A-Z])/i, '$1-$2');
+      const classVariants = Array.from(new Set([
+        classSectionParam,
+        rawClean,
+        noHyphen,
+        withHyphen,
+        `Class ${rawClean}`,
+        `Class ${withHyphen}`
+      ]));
+      dbQuery = dbQuery.in('class_section', classVariants);
     }
-    if (query.status) {
-      dbQuery = dbQuery.eq('status', query.status);
+
+    const isDefaulterParam = query.is_defaulter || (query as unknown as Record<string, string>).isDefaulter;
+    if (isDefaulterParam === 'true' || isDefaulterParam === '1') {
+      const { data: defaulterLogs } = await supabase
+        .from('defaulter_logs')
+        .select('student_id')
+        .eq('is_defaulter', true);
+
+      const defaulterStudentIds = Array.from(new Set((defaulterLogs || []).map((d) => d.student_id)));
+      if (defaulterStudentIds.length === 0) {
+        return { records: [], total: 0, page, limit };
+      }
+      dbQuery = dbQuery.in('student_id', defaulterStudentIds);
     }
-    if (query.start_date) {
-      dbQuery = dbQuery.gte('attendance_date', query.start_date);
+
+    if (query.status && query.status !== 'ALL') {
+      dbQuery = dbQuery.eq('status', query.status as import('../types/index.js').AttendanceStatus);
     }
-    if (query.end_date) {
-      dbQuery = dbQuery.lte('attendance_date', query.end_date);
+
+
+    const startDateParam = query.start_date || (query as unknown as Record<string, string>).startDate;
+    if (startDateParam) {
+      dbQuery = dbQuery.gte('attendance_date', startDateParam);
     }
+
+    const endDateParam = query.end_date || (query as unknown as Record<string, string>).endDate;
+    if (endDateParam) {
+      dbQuery = dbQuery.lte('attendance_date', endDateParam);
+    }
+
     if (query.search) {
       const searchTerm = `%${query.search.trim()}%`;
       dbQuery = dbQuery.or(`student_name_snapshot.ilike.${searchTerm},record_code.ilike.${searchTerm},reason.ilike.${searchTerm}`);
     }
+
 
     dbQuery = dbQuery
       .order('attendance_date', { ascending: false })

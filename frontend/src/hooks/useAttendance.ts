@@ -39,7 +39,8 @@ export function useAttendance() {
   const [activeTab, setActiveTab] = useState<ActiveTabMode>('workspace');
 
   // Attendance Session Domain State
-  const [selectedClassSection, setSelectedClassSection] = useState<string>('Class 10-A');
+  const [selectedClassSection, setSelectedClassSection] = useState<string>('10A');
+
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [session, setSession] = useState<AttendanceSession | null>(null);
   const [roster, setRoster] = useState<StudentRosterEntry[]>([]);

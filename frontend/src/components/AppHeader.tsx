@@ -13,7 +13,8 @@ interface AppHeaderProps {
 export const AppHeader: React.FC<AppHeaderProps> = ({
   activeTab,
   onTabChange,
-  metrics,
+  metrics: _metrics,
+
   onOpenAddModal,
 }) => {
   return (
@@ -32,29 +33,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           </div>
         </div>
 
-        {/* Overview Metric Pills (Summary KPI Strip) */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <div className="header-kpi-pill">
-            <span className="header-kpi-label">Defaulters</span>
-            <span className="header-kpi-val" style={{ color: metrics.defaultersCount > 0 ? '#ef4444' : '#10b981' }}>
-              {metrics.defaultersCount}
-            </span>
-          </div>
 
-          <div className="header-kpi-pill">
-            <span className="header-kpi-label">Attendance Rate</span>
-            <span className="header-kpi-val" style={{ color: '#10b981' }}>
-              {metrics.attendanceRate.toFixed(1)}%
-            </span>
-          </div>
-
-          <div className="header-kpi-pill">
-            <span className="header-kpi-label">Threshold</span>
-            <span className="header-kpi-val" style={{ color: '#f59e0b' }}>
-              ≥ {metrics.policyThreshold}d
-            </span>
-          </div>
-        </div>
 
         {/* Mode Switcher Tabs & Quick Action */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>

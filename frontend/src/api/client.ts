@@ -64,17 +64,22 @@ export interface AttendanceRecord {
 export interface StudentSummary {
   student_id: string;
   student_name: string;
-  student_code: string;
+  student_code?: string;
   class_section: string;
-  total_days: number;
-  present_count: number;
-  absent_count: number;
-  excused_count: number;
-  last_30_days_absent: number;
+  total_days?: number;
+  present_count?: number;
+  absent_count?: number;
+  excused_count?: number;
+  last_30_days_absent?: number;
+  absences_last_30_days?: number;
+  total_considered_days?: number;
+  attendance_percentage: number;
   is_defaulter: boolean;
   warning_reason: string | null;
-  threshold_applied: number;
+  threshold_applied?: number;
+  absence_threshold?: number;
 }
+
 
 export interface SummaryMetrics {
   totalRecords: number;
@@ -85,6 +90,7 @@ export interface SummaryMetrics {
 }
 
 export interface FilterParams {
+  studentId?: string;
   search?: string;
   classSection?: string;
   status?: string;
@@ -92,6 +98,7 @@ export interface FilterParams {
   endDate?: string;
   isDefaulter?: boolean;
 }
+
 
 export interface CreateRecordPayload {
   student_name: string;
@@ -200,12 +207,14 @@ export async function fetchRecords(filters?: FilterParams): Promise<{
   metrics: SummaryMetrics;
 }> {
   const query = new URLSearchParams();
+  if (filters?.studentId) query.append('student_id', filters.studentId);
   if (filters?.search) query.append('search', filters.search);
   if (filters?.classSection && filters.classSection !== 'ALL') query.append('classSection', filters.classSection);
   if (filters?.status && filters.status !== 'ALL') query.append('status', filters.status);
   if (filters?.startDate) query.append('startDate', filters.startDate);
   if (filters?.endDate) query.append('endDate', filters.endDate);
   if (filters?.isDefaulter !== undefined && filters.isDefaulter) query.append('isDefaulter', 'true');
+
 
   const queryString = query.toString();
   const endpoint = `/attendance/history${queryString ? `?${queryString}` : ''}`;

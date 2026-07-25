@@ -42,7 +42,7 @@ export const StudentWorkspaceDrawer: React.FC<StudentWorkspaceDrawerProps> = ({
       try {
         const [sumData, historyData] = await Promise.all([
           fetchStudentSummary(studentId),
-          fetchRecords({ search: studentId }),
+          fetchRecords({ studentId }),
         ]);
 
         if (!cancelled) {
@@ -68,7 +68,7 @@ export const StudentWorkspaceDrawer: React.FC<StudentWorkspaceDrawerProps> = ({
       setDrawerState('loading');
       Promise.all([
         fetchStudentSummary(studentId),
-        fetchRecords({ search: studentId }),
+        fetchRecords({ studentId }),
       ])
         .then(([sumData, historyData]) => {
           setSummary(sumData);
@@ -84,6 +84,18 @@ export const StudentWorkspaceDrawer: React.FC<StudentWorkspaceDrawerProps> = ({
   };
 
   if (!isOpen) return null;
+
+  const totalDays = summary ? (summary.total_days ?? summary.total_considered_days ?? 0) : 0;
+  const presentCount = summary ? (summary.present_count ?? 0) : 0;
+  const absentCount = summary ? (summary.absent_count ?? summary.last_30_days_absent ?? summary.absences_last_30_days ?? 0) : 0;
+  const excusedCount = summary ? (summary.excused_count ?? 0) : 0;
+  const absences30d = summary ? (summary.last_30_days_absent ?? summary.absences_last_30_days ?? 0) : 0;
+  const threshold = summary ? (summary.threshold_applied ?? summary.absence_threshold ?? 5) : 5;
+  const rateStr = summary
+    ? summary.attendance_percentage !== undefined && summary.attendance_percentage !== null
+      ? `${summary.attendance_percentage.toFixed(1)}%`
+      : (totalDays > 0 ? `${((presentCount / totalDays) * 100).toFixed(1)}%` : '—')
+    : '—';
 
   return (
     <>
@@ -147,19 +159,19 @@ export const StudentWorkspaceDrawer: React.FC<StudentWorkspaceDrawerProps> = ({
               {/* 30-Day Summary Grid */}
               <div className="drawer-summary-grid">
                 <div className="drawer-stat">
-                  <span className="drawer-stat-value">{summary.total_days}</span>
+                  <span className="drawer-stat-value">{totalDays}</span>
                   <span className="drawer-stat-label">Total Days</span>
                 </div>
                 <div className="drawer-stat">
-                  <span className="drawer-stat-value" style={{ color: 'var(--present)' }}>{summary.present_count}</span>
+                  <span className="drawer-stat-value" style={{ color: 'var(--present)' }}>{presentCount}</span>
                   <span className="drawer-stat-label">Present</span>
                 </div>
                 <div className="drawer-stat">
-                  <span className="drawer-stat-value" style={{ color: 'var(--absent)' }}>{summary.absent_count}</span>
+                  <span className="drawer-stat-value" style={{ color: 'var(--absent)' }}>{absentCount}</span>
                   <span className="drawer-stat-label">Absent</span>
                 </div>
                 <div className="drawer-stat">
-                  <span className="drawer-stat-value" style={{ color: 'var(--excused)' }}>{summary.excused_count}</span>
+                  <span className="drawer-stat-value" style={{ color: 'var(--excused)' }}>{excusedCount}</span>
                   <span className="drawer-stat-label">Excused</span>
                 </div>
               </div>
@@ -168,17 +180,13 @@ export const StudentWorkspaceDrawer: React.FC<StudentWorkspaceDrawerProps> = ({
               <div className="drawer-metrics">
                 <div className="drawer-metric-row">
                   <span className="drawer-metric-label">30-Day Absences</span>
-                  <span className="drawer-metric-value" style={{ color: summary.last_30_days_absent >= summary.threshold_applied ? 'var(--absent)' : 'var(--text-primary)' }}>
-                    {summary.last_30_days_absent} / {summary.threshold_applied}
+                  <span className="drawer-metric-value" style={{ color: absences30d >= threshold ? 'var(--absent)' : 'var(--text-primary)' }}>
+                    {absences30d} / {threshold}
                   </span>
                 </div>
                 <div className="drawer-metric-row">
                   <span className="drawer-metric-label">Attendance Rate</span>
-                  <span className="drawer-metric-value">
-                    {summary.total_days > 0
-                      ? `${((summary.present_count / summary.total_days) * 100).toFixed(1)}%`
-                      : '—'}
-                  </span>
+                  <span className="drawer-metric-value">{rateStr}</span>
                 </div>
                 <div className="drawer-metric-row">
                   <span className="drawer-metric-label">Dropout Risk Status</span>

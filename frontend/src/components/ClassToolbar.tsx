@@ -2,12 +2,14 @@ import React from 'react';
 import { Calendar } from 'lucide-react';
 
 const CLASS_SECTIONS = [
-  { value: 'Class 9-A', label: '9-A' },
-  { value: 'Class 9-B', label: '9-B' },
-  { value: 'Class 10-A', label: '10-A' },
-  { value: 'Class 10-B', label: '10-B' },
-  { value: 'Class 11-A', label: '11-A' },
-  { value: 'Class 12-A', label: '12-A' },
+  { value: '8A', label: '8-A' },
+  { value: '8B', label: '8-B' },
+  { value: '9A', label: '9-A' },
+  { value: '9B', label: '9-B' },
+  { value: '10A', label: '10-A' },
+  { value: '10B', label: '10-B' },
+  { value: '11A', label: '11-A' },
+  { value: '12A', label: '12-A' },
 ];
 
 interface ClassToolbarProps {
@@ -30,7 +32,7 @@ export const ClassToolbar: React.FC<ClassToolbarProps> = ({
           <button
             key={sec.value}
             type="button"
-            className={`class-pill ${activeClass === sec.value ? 'active' : ''}`}
+            className={`class-pill ${activeClass === sec.value || activeClass === `Class ${sec.label}` ? 'active' : ''}`}
             onClick={() => onClassChange(sec.value)}
           >
             {sec.label}

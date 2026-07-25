@@ -33,18 +33,60 @@ export const getRecords = async (
     const queryInput = req.query as unknown as GetRecordsQueryInput;
     const result = await attendanceService.getRecords(queryInput);
 
-    // Map records to frontend-expected field names
-    const mappedRecords = result.records.map(mapRecordToFrontend);
+    // Fetch student master info to map real student_code
+    const uniqueStudentIds = Array.from(new Set(result.records.map((r) => r.student_id)));
+    const studentCodeMap = new Map<string, string>();
+    const defaulterSet = new Set<string>();
+
+    if (uniqueStudentIds.length > 0) {
+      const { data: studentList } = await supabase
+        .from('students')
+        .select('id, student_code')
+        .in('id', uniqueStudentIds);
+
+      (studentList || []).forEach((s) => {
+        studentCodeMap.set(s.id, s.student_code);
+      });
+
+      // Query defaulter_logs for active defaulters
+      const { data: defaulterList } = await supabase
+        .from('defaulter_logs')
+        .select('student_id')
+        .in('student_id', uniqueStudentIds)
+        .eq('is_defaulter', true);
+
+      (defaulterList || []).forEach((d) => {
+        defaulterSet.add(d.student_id);
+      });
+    }
+
+    // Map records to frontend-expected field names with enriched student_code and is_defaulter
+    const mappedRecords = result.records.map((record) => {
+      const realStudentCode = studentCodeMap.get(record.student_id) || record.record_code;
+      const isDefaulter = defaulterSet.has(record.student_id);
+
+      return {
+        id: record.id,
+        record_code: record.record_code,
+        student_id: record.student_id,
+        student_code: realStudentCode,
+        student_name: record.student_name_snapshot,
+        class_section: record.class_section,
+        date: record.attendance_date,
+        status: record.status,
+        remarks: record.reason,
+        is_defaulter: isDefaulter,
+        created_at: record.created_at,
+        updated_at: record.updated_at,
+      };
+    });
 
     // Compute summary metrics server-side for the dashboard cards
     const totalRecords = result.total;
-
-    // Count unique students across all records
-    const uniqueStudentIds = new Set(result.records.map(r => r.student_id));
-    const totalStudents = uniqueStudentIds.size;
+    const totalStudents = uniqueStudentIds.length;
 
     // Count present records for attendance rate
-    const presentCount = result.records.filter(r => r.status === 'present').length;
+    const presentCount = result.records.filter((r) => r.status === 'present').length;
     const attendanceRate = result.records.length > 0
       ? Math.round((presentCount / result.records.length) * 100)
       : 0;
@@ -69,7 +111,7 @@ export const getRecords = async (
     try {
       const { count } = await supabase
         .from('defaulter_logs')
-        .select('*', { count: 'exact', head: true })
+        .select('student_id', { count: 'exact', head: true })
         .eq('is_defaulter', true);
       defaultersCount = count || 0;
     } catch {
@@ -86,6 +128,7 @@ export const getRecords = async (
         policyThreshold,
       },
     };
+
 
     const response: ApiSuccessResponse<typeof responsePayload> = {
       success: true,

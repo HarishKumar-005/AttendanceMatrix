@@ -61,19 +61,27 @@ export interface DefaulterLog {
 export interface StudentSummary {
   student_id: string;
   student_name: string;
+  student_code?: string;
   class_section: string;
   evaluation_date: string;
   window_start: string;
   window_end: string;
   window_days: number;
   absences_last_30_days: number;
+  last_30_days_absent?: number;
   total_considered_days: number;
+  total_days?: number;
+  present_count?: number;
+  absent_count?: number;
+  excused_count?: number;
   attendance_percentage: number;
   absence_threshold: number;
+  threshold_applied?: number;
   is_defaulter: boolean;
   warning_reason: string;
   evaluated_at: string;
 }
+
 
 export type Json =
   | string

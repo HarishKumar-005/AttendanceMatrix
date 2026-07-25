@@ -51,7 +51,7 @@ export class RecalculationService {
 
     const { data: studentData } = await supabase
       .from('students')
-      .select('full_name, current_class_section')
+      .select('student_code, full_name, current_class_section')
       .eq('id', studentId)
       .single();
 
@@ -60,26 +60,33 @@ export class RecalculationService {
       classSection = studentData.current_class_section;
     }
 
-    // 3. Query attendance records for student within 30-day window
-    const { data: records, error: recordsError } = await supabase
+
+    // 3. Query all attendance records for student (overall + 30-day window)
+    const { data: allRecords, error: recordsError } = await supabase
       .from('attendance_records')
       .select('*')
-      .eq('student_id', studentId)
-      .gte('attendance_date', windowStartStr)
-      .lte('attendance_date', targetDateStr);
+      .eq('student_id', studentId);
 
     if (recordsError) {
       console.error(`[RecalculationService] Error querying records for student ${studentId}:`, recordsError);
     }
 
-    const attendanceHistory = records || [];
-    const absencesLast30Days = attendanceHistory.filter((r) => r.status === 'absent').length;
+    const attendanceHistory = allRecords || [];
+
+    // Filter 30-day window records for early-warning evaluation
+    const windowRecords = attendanceHistory.filter(
+      (r) => r.attendance_date >= windowStartStr && r.attendance_date <= targetDateStr
+    );
+
+    const absencesLast30Days = windowRecords.filter((r) => r.status === 'absent').length;
+    const totalDays = attendanceHistory.length;
     const presentCount = attendanceHistory.filter((r) => r.status === 'present').length;
-    const totalConsideredDays = attendanceHistory.length;
+    const absentCount = attendanceHistory.filter((r) => r.status === 'absent').length;
+    const excusedCount = attendanceHistory.filter((r) => r.status === 'excused').length;
 
     const attendancePercentage =
-      totalConsideredDays > 0
-        ? Number(((presentCount / totalConsideredDays) * 100).toFixed(2))
+      totalDays > 0
+        ? Number(((presentCount / totalDays) * 100).toFixed(1))
         : 100.0;
 
     const isDefaulter = absencesLast30Days >= threshold;
@@ -90,19 +97,28 @@ export class RecalculationService {
     const summary: StudentSummary = {
       student_id: studentId,
       student_name: studentName,
+      student_code: studentData ? studentData.student_code : studentId,
       class_section: classSection,
       evaluation_date: targetDateStr,
       window_start: windowStartStr,
       window_end: targetDateStr,
       window_days: windowDays,
       absences_last_30_days: absencesLast30Days,
-      total_considered_days: totalConsideredDays,
+      last_30_days_absent: absencesLast30Days,
+      total_considered_days: totalDays,
+      total_days: totalDays,
+      present_count: presentCount,
+      absent_count: absentCount,
+      excused_count: excusedCount,
       attendance_percentage: attendancePercentage,
+      threshold_applied: threshold,
       absence_threshold: threshold,
       is_defaulter: isDefaulter,
       warning_reason: warningReason,
       evaluated_at: new Date().toISOString(),
     };
+
+
 
     // 4. Log calculation result to defaulter_logs for audit
     try {
@@ -116,7 +132,8 @@ export class RecalculationService {
         window_end: targetDateStr,
         window_days: windowDays,
         absences_last_30_days: absencesLast30Days,
-        total_considered_days: totalConsideredDays,
+        total_considered_days: totalDays,
+
         attendance_percentage: attendancePercentage,
         threshold_absences: threshold,
         minimum_attendance_percentage: minPercentage,

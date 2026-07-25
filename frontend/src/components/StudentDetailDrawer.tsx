@@ -162,15 +162,15 @@ export const StudentDetailDrawer: React.FC<StudentDetailDrawerProps> = ({
               <div className="drawer-metrics">
                 <div className="drawer-metric-row">
                   <span className="drawer-metric-label">30-Day Absences</span>
-                  <span className="drawer-metric-value" style={{ color: summary.last_30_days_absent >= summary.threshold_applied ? 'var(--absent)' : 'var(--text-primary)' }}>
-                    {summary.last_30_days_absent} / {summary.threshold_applied}
+                  <span className="drawer-metric-value" style={{ color: (summary.last_30_days_absent ?? summary.absences_last_30_days ?? 0) >= (summary.threshold_applied ?? summary.absence_threshold ?? 5) ? 'var(--absent)' : 'var(--text-primary)' }}>
+                    {summary.last_30_days_absent ?? summary.absences_last_30_days ?? 0} / {summary.threshold_applied ?? summary.absence_threshold ?? 5}
                   </span>
                 </div>
                 <div className="drawer-metric-row">
                   <span className="drawer-metric-label">Attendance Rate</span>
                   <span className="drawer-metric-value">
-                    {summary.total_days > 0
-                      ? `${((summary.present_count / summary.total_days) * 100).toFixed(1)}%`
+                    {(summary.total_days ?? summary.total_considered_days ?? 0) > 0
+                      ? `${(((summary.present_count ?? 0) / (summary.total_days ?? summary.total_considered_days ?? 1)) * 100).toFixed(1)}%`
                       : '—'}
                   </span>
                 </div>
@@ -181,6 +181,7 @@ export const StudentDetailDrawer: React.FC<StudentDetailDrawerProps> = ({
                   </span>
                 </div>
               </div>
+
 
               {/* Recent History */}
               <div className="drawer-history-section">

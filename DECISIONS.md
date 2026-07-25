@@ -103,5 +103,21 @@ Following a formal architecture review, the application was refactored into a do
 - Zero client-side derived state caching.
 - Build & type checks pass cleanly (`tsc --noEmit` & `vite build`).
 
+## [2026-07-26] Teacher Notification Center & Early Warning System Architecture
 
+### Context
+AttendanceMatrix required an active Early Warning System where teachers are automatically alerted when students reach or approach dropout risk thresholds, rather than manually scanning tables.
 
+### Key Architectural Decisions
+1. **ADR-05: Durable Notification Store**: Created Supabase table `teacher_notifications` (`02_teacher_notifications.sql`) storing alerts with severity levels (🔴 Critical, 🟠 Warning, 🟢 Recovery, 🔵 Info) and metadata.
+2. **ADR-06: Smart Alert Deduplication**: `notificationService.evaluateAndCreateAlert` evaluates risk state transitions during `recalculationService` execution. Alerts are generated ONLY on state changes (crossing threshold, reaching 4/5 absences, or recovering), preventing alert spam on duplicate recalculations.
+3. **ADR-07: Enterprise Notification UI & Early Warning Center**:
+   - Top-right Notification Bell with animated unread badge counter and dropdown panel (desktop) / bottom sheet (mobile).
+   - Global Toast container with direct "View Student" CTA.
+   - Early Warning Dashboard Center tab featuring Critical Defaulters, Students Near Threshold, Recovered Students, and quick student profile inspection.
+4. **ADR-08: In-Memory Resilience Fallback**: Included automatic in-memory buffer fallback in `NotificationService` when operating against unmigrated Supabase instances so app never crashes.
+
+### Rationale & Trade-offs
+- 100% 3-tier architecture compliance. Browser calls REST API endpoints (`/api/notifications*`).
+- Zero duplicate notifications.
+- All packages (`/shared`, `/backend`, `/frontend`) pass `tsc --noEmit` cleanly with 0 errors.

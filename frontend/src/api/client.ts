@@ -7,6 +7,53 @@
 export type AttendanceStatus = 'present' | 'absent' | 'excused';
 export type SessionLifecycle = 'clean' | 'draft' | 'saving' | 'saved' | 'failed';
 
+export type NotificationSeverity = 'critical' | 'warning' | 'recovery' | 'info';
+export type NotificationType =
+  | 'threshold_reached'
+  | 'approaching_threshold'
+  | 'recovered'
+  | 'policy_updated';
+
+export interface TeacherNotificationMetadata {
+  absences_last_30_days?: number;
+  threshold?: number;
+  attendance_percentage?: number;
+  previous_status?: string;
+  new_status?: string;
+  evaluation_date?: string;
+  [key: string]: unknown;
+}
+
+export interface TeacherNotification {
+  id: string;
+  student_id: string | null;
+  student_name: string | null;
+  student_code: string | null;
+  class_section: string | null;
+  title: string;
+  message: string;
+  severity: NotificationSeverity;
+  notification_type: NotificationType;
+  is_read: boolean;
+  is_dismissed: boolean;
+  created_at: string;
+  read_at: string | null;
+  metadata: TeacherNotificationMetadata;
+  triggered_by: string;
+  recommendation: string | null;
+}
+
+export interface NotificationAnalytics {
+  unread_count: number;
+  critical_count: number;
+  warning_count: number;
+  recovery_count: number;
+  total_active_alerts: number;
+  students_near_threshold_count: number;
+  recently_flagged_count: number;
+  recovered_students_count: number;
+}
+
 export interface StudentRosterEntry {
   student_id: string;
   student_code: string;
@@ -80,7 +127,6 @@ export interface StudentSummary {
   absence_threshold?: number;
 }
 
-
 export interface SummaryMetrics {
   totalRecords: number;
   totalStudents: number;
@@ -98,7 +144,6 @@ export interface FilterParams {
   endDate?: string;
   isDefaulter?: boolean;
 }
-
 
 export interface CreateRecordPayload {
   student_name: string;
@@ -215,7 +260,6 @@ export async function fetchRecords(filters?: FilterParams): Promise<{
   if (filters?.endDate) query.append('endDate', filters.endDate);
   if (filters?.isDefaulter !== undefined && filters.isDefaulter) query.append('isDefaulter', 'true');
 
-
   const queryString = query.toString();
   const endpoint = `/attendance/history${queryString ? `?${queryString}` : ''}`;
   
@@ -257,4 +301,59 @@ export async function fetchStudentSummary(studentId: string): Promise<StudentSum
   return request<StudentSummary>(`/students/${studentId}/summary`, {
     method: 'GET',
   });
+}
+
+/**
+ * Notifications API Client Methods
+ */
+export async function fetchNotifications(filters?: {
+  unread_only?: boolean;
+  severity?: NotificationSeverity;
+  page?: number;
+  limit?: number;
+}): Promise<TeacherNotification[]> {
+  const query = new URLSearchParams();
+  if (filters?.unread_only) query.append('unread_only', 'true');
+  if (filters?.severity) query.append('severity', filters.severity);
+  if (filters?.page) query.append('page', String(filters.page));
+  if (filters?.limit) query.append('limit', String(filters.limit));
+
+  const qStr = query.toString();
+  return request<TeacherNotification[]>(`/notifications${qStr ? `?${qStr}` : ''}`);
+}
+
+export async function fetchUnreadNotificationCount(): Promise<number> {
+  const res = await request<{ unread_count: number }>('/notifications/unread-count');
+  return res.unread_count;
+}
+
+export async function markNotificationRead(id: string): Promise<TeacherNotification> {
+  return request<TeacherNotification>(`/notifications/${id}/read`, {
+    method: 'PATCH',
+  });
+}
+
+export async function markAllNotificationsRead(): Promise<number> {
+  const res = await request<{ updated_count: number }>('/notifications/mark-all-read', {
+    method: 'POST',
+  });
+  return res.updated_count;
+}
+
+export async function dismissNotification(id: string): Promise<boolean> {
+  const res = await request<{ dismissed: boolean }>(`/notifications/${id}`, {
+    method: 'DELETE',
+  });
+  return res.dismissed;
+}
+
+export async function clearAllNotifications(): Promise<number> {
+  const res = await request<{ cleared_count: number }>('/notifications', {
+    method: 'DELETE',
+  });
+  return res.cleared_count;
+}
+
+export async function fetchNotificationAnalytics(): Promise<NotificationAnalytics> {
+  return request<NotificationAnalytics>('/notifications/analytics');
 }

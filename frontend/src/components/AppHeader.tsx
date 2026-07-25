@@ -1,13 +1,31 @@
 import React from 'react';
-import { GraduationCap, CheckSquare, History, Plus } from 'lucide-react';
+import { GraduationCap, CheckSquare, History, ShieldAlert, Plus } from 'lucide-react';
 import { ActiveTabMode } from '../hooks/useAttendance';
-import { SummaryMetrics } from '../api/client';
+import { SummaryMetrics, TeacherNotification } from '../api/client';
+import { NotificationBell } from './NotificationBell';
+
+export type CombinedTabMode = ActiveTabMode | 'early-warning';
 
 interface AppHeaderProps {
-  activeTab: ActiveTabMode;
-  onTabChange: (tab: ActiveTabMode) => void;
+  activeTab: CombinedTabMode;
+  onTabChange: (tab: CombinedTabMode) => void;
   metrics: SummaryMetrics;
   onOpenAddModal: () => void;
+  notifications: TeacherNotification[];
+  unreadCount: number;
+  loadingNotifs: boolean;
+  errorNotifs: string | null;
+  isNotifOpen: boolean;
+  notifActiveTab: 'all' | 'unread';
+  onNotifToggle: () => void;
+  onNotifClose: () => void;
+  onNotifTabChange: (tab: 'all' | 'unread') => void;
+  onMarkRead: (id: string) => void;
+  onMarkAllRead: () => void;
+  onDismissNotif: (id: string) => void;
+  onClearAllNotifs: () => void;
+  onRefreshNotifs: () => void;
+  onSelectStudent?: (studentId: string, studentName: string, studentCode: string, classSection: string) => void;
 }
 
 export const AppHeader: React.FC<AppHeaderProps> = ({
@@ -15,6 +33,21 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   onTabChange,
   metrics: _metrics,
   onOpenAddModal,
+  notifications,
+  unreadCount,
+  loadingNotifs,
+  errorNotifs,
+  isNotifOpen,
+  notifActiveTab,
+  onNotifToggle,
+  onNotifClose,
+  onNotifTabChange,
+  onMarkRead,
+  onMarkAllRead,
+  onDismissNotif,
+  onClearAllNotifs,
+  onRefreshNotifs,
+  onSelectStudent,
 }) => {
   return (
     <header className="glass-panel" style={{ padding: '0.875rem 1.25rem', marginBottom: '1rem' }}>
@@ -32,7 +65,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           </div>
         </div>
 
-        {/* Mode Switcher Tabs & Quick Action */}
+        {/* Mode Switcher Tabs, Notification Bell, & Quick Action */}
         <div className="app-header-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <div className="nav-tab-group">
             <button
@@ -52,7 +85,35 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               <History style={{ width: '0.875rem', height: '0.875rem' }} />
               History Log
             </button>
+
+            <button
+              type="button"
+              className={`nav-tab-btn ${activeTab === 'early-warning' ? 'active' : ''}`}
+              onClick={() => onTabChange('early-warning')}
+            >
+              <ShieldAlert style={{ width: '0.875rem', height: '0.875rem', color: activeTab === 'early-warning' ? '#ffffff' : '#f43f5e' }} />
+              Early Warning
+            </button>
           </div>
+
+          {/* Teacher Notification Bell */}
+          <NotificationBell
+            notifications={notifications}
+            unreadCount={unreadCount}
+            loading={loadingNotifs}
+            error={errorNotifs}
+            isOpen={isNotifOpen}
+            activeTab={notifActiveTab}
+            onToggle={onNotifToggle}
+            onClose={onNotifClose}
+            onTabChange={onNotifTabChange}
+            onMarkRead={onMarkRead}
+            onMarkAllRead={onMarkAllRead}
+            onDismiss={onDismissNotif}
+            onClearAll={onClearAllNotifs}
+            onRefresh={onRefreshNotifs}
+            onSelectStudent={onSelectStudent}
+          />
 
           {activeTab === 'history' && (
             <button className="btn btn-secondary" onClick={onOpenAddModal} style={{ padding: '0.375rem 0.75rem', fontSize: '0.8125rem' }}>

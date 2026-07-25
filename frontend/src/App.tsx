@@ -1,16 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAttendance } from './hooks/useAttendance';
-import { AppHeader } from './components/AppHeader';
+import { useNotifications } from './hooks/useNotifications';
+import { AppHeader, CombinedTabMode } from './components/AppHeader';
 import { AttendanceWorkspace } from './components/AttendanceWorkspace';
 import { AttendanceHistory } from './components/AttendanceHistory';
+import { EarlyWarningDashboard } from './components/EarlyWarningDashboard';
 import { StudentWorkspaceDrawer } from './components/StudentWorkspaceDrawer';
 import { AttendanceForm } from './components/AttendanceForm';
+import { NotificationToastContainer } from './components/NotificationToastContainer';
 
 export const App: React.FC = () => {
   const {
     // Nav & Mode
-    activeTab,
-    setActiveTab,
+    activeTab: workspaceTab,
+    setActiveTab: setWorkspaceTab,
 
     // Session Workspace Domain State
     selectedClassSection,
@@ -58,20 +61,71 @@ export const App: React.FC = () => {
     saveHistoryRecord,
   } = useAttendance();
 
+  const {
+    notifications,
+    unreadCount,
+    analytics,
+    loading: loadingNotifs,
+    error: errorNotifs,
+    isOpen: isNotifOpen,
+    activeTab: notifActiveTab,
+    toasts,
+    setActiveTab: setNotifActiveTab,
+    togglePanel: toggleNotifPanel,
+    closePanel: closeNotifPanel,
+    markRead: markNotifRead,
+    markAllRead: markAllNotifsRead,
+    dismiss: dismissNotif,
+    clearAll: clearAllNotifs,
+    dismissToast,
+    refresh: refreshNotifs,
+  } = useNotifications();
+
+  const [currentTab, setCurrentTab] = useState<CombinedTabMode>(workspaceTab);
+
+  const handleTabSwitch = (tab: CombinedTabMode) => {
+    setCurrentTab(tab);
+    if (tab === 'workspace' || tab === 'history') {
+      setWorkspaceTab(tab);
+    }
+  };
+
   return (
     <div className="app-container">
       {/* Top Application Header & Navigation Bar */}
       <AppHeader
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
+        activeTab={currentTab}
+        onTabChange={handleTabSwitch}
         metrics={metrics}
         onOpenAddModal={openAddModal}
+        notifications={notifications}
+        unreadCount={unreadCount}
+        loadingNotifs={loadingNotifs}
+        errorNotifs={errorNotifs}
+        isNotifOpen={isNotifOpen}
+        notifActiveTab={notifActiveTab}
+        onNotifToggle={toggleNotifPanel}
+        onNotifClose={closeNotifPanel}
+        onNotifTabChange={setNotifActiveTab}
+        onMarkRead={markNotifRead}
+        onMarkAllRead={markAllNotifsRead}
+        onDismissNotif={dismissNotif}
+        onClearAllNotifs={clearAllNotifs}
+        onRefreshNotifs={refreshNotifs}
+        onSelectStudent={selectStudent}
+      />
+
+      {/* Live Early Warning Toast Manager */}
+      <NotificationToastContainer
+        toasts={toasts}
+        onDismiss={dismissToast}
+        onSelectStudent={selectStudent}
       />
 
       {/* Main Workspace Layout */}
       <main className="workspace-layout">
         <div className="workspace-main">
-          {activeTab === 'workspace' ? (
+          {currentTab === 'workspace' && (
             /* Primary Domain View: Attendance Workspace */
             <AttendanceWorkspace
               activeClass={selectedClassSection}
@@ -93,7 +147,9 @@ export const App: React.FC = () => {
               onFocusRow={setFocusedStudentIndex}
               onRetry={refetchSession}
             />
-          ) : (
+          )}
+
+          {currentTab === 'history' && (
             /* Secondary Domain View: Attendance History & Audit */
             <AttendanceHistory
               records={historyRecords}
@@ -108,6 +164,18 @@ export const App: React.FC = () => {
               onEditRecord={openEditModal}
               onStudentClick={selectStudent}
               onRetry={refetchHistory}
+            />
+          )}
+
+          {currentTab === 'early-warning' && (
+            /* Early Warning Dashboard Center View */
+            <EarlyWarningDashboard
+              notifications={notifications}
+              analytics={analytics}
+              loading={loadingNotifs}
+              error={errorNotifs}
+              onRefresh={refreshNotifs}
+              onSelectStudent={selectStudent}
             />
           )}
         </div>

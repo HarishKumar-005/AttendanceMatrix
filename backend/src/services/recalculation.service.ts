@@ -1,5 +1,6 @@
 import { supabase } from '../config/db.js';
 import { StudentSummary } from '../types/index.js';
+import { notificationService } from './notification.service.js';
 
 export class RecalculationService {
   /**
@@ -21,6 +22,24 @@ export class RecalculationService {
     const startDate = new Date(evalDate);
     startDate.setDate(startDate.getDate() - 30);
     const windowStartStr = startDate.toISOString().slice(0, 10);
+
+    // 0. Fetch previous defaulter log entry to check prior absence state for smart alert triggers
+    let previousAbsenceCount: number | undefined = undefined;
+    try {
+      const { data: prevLog } = await supabase
+        .from('defaulter_logs')
+        .select('absences_last_30_days, is_defaulter')
+        .eq('student_id', studentId)
+        .order('evaluated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (prevLog) {
+        previousAbsenceCount = prevLog.absences_last_30_days;
+      }
+    } catch {
+      // Ignore fallback if previous log is absent
+    }
 
     // 1. Fetch attendance policy (fallback to defaults if policy table is not seeded)
     let threshold = 5;
@@ -59,7 +78,6 @@ export class RecalculationService {
       studentName = studentData.full_name;
       classSection = studentData.current_class_section;
     }
-
 
     // 3. Query all attendance records for student (overall + 30-day window)
     const { data: allRecords, error: recordsError } = await supabase
@@ -118,8 +136,6 @@ export class RecalculationService {
       evaluated_at: new Date().toISOString(),
     };
 
-
-
     // 4. Log calculation result to defaulter_logs for audit
     try {
       await supabase.from('defaulter_logs').insert({
@@ -133,7 +149,6 @@ export class RecalculationService {
         window_days: windowDays,
         absences_last_30_days: absencesLast30Days,
         total_considered_days: totalDays,
-
         attendance_percentage: attendancePercentage,
         threshold_absences: threshold,
         minimum_attendance_percentage: minPercentage,
@@ -144,6 +159,13 @@ export class RecalculationService {
       });
     } catch (auditErr) {
       console.warn(`[RecalculationService] Failed to write audit log to defaulter_logs:`, auditErr);
+    }
+
+    // 5. Smart Alert Trigger Integration: evaluate and create notification if state transitioned
+    try {
+      await notificationService.evaluateAndCreateAlert(summary, previousAbsenceCount);
+    } catch (notifErr) {
+      console.warn(`[RecalculationService] Alert evaluation encountered error:`, notifErr);
     }
 
     return summary;

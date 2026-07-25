@@ -5,6 +5,7 @@ import healthRoutes from './routes/health.routes.js';
 import recordsRoutes from './routes/records.routes.js';
 import studentsRoutes from './routes/students.routes.js';
 import attendanceRoutes from './routes/attendance.routes.js';
+import notificationRoutes from './routes/notification.routes.js';
 import { errorHandler, AppError } from './middleware/error-handler.js';
 
 const app = express();
@@ -18,7 +19,7 @@ app.use('/api/health', healthRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/records', recordsRoutes);
 app.use('/api/students', studentsRoutes);
-
+app.use('/api/notifications', notificationRoutes);
 
 // Catch-all 404 Not Found handler
 app.use((req: Request, _res: Response, next: NextFunction) => {

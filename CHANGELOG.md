@@ -106,3 +106,27 @@ All notable changes to the AttendanceMatrix project are documented here in appen
 ### Metrics
 - Frontend Build: 195.27 KB (gzip: 57.50 KB)
 - Verified across 11 viewports with zero layout errors.
+
+## [2026-07-26] Intelligent Teacher Notification Center & Early Warning Dashboard
+
+### Added
+- **Database Schema**:
+  - Created [`02_teacher_notifications.sql`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/supabase/migrations/02_teacher_notifications.sql) introducing `teacher_notifications` table, `notification_severity` enum (`critical`, `warning`, `recovery`, `info`), `notification_type` enum (`threshold_reached`, `approaching_threshold`, `recovered`, `policy_updated`), and performance indexes.
+- **Shared Contracts**:
+  - Added [`notification.types.ts`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/shared/src/types/notification.types.ts) and [`notification.schema.ts`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/shared/src/schemas/notification.schema.ts) in `/shared` package.
+- **Backend Notification Service & Deduplication Engine**:
+  - Implemented [`notification.service.ts`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/backend/src/services/notification.service.ts) handling DB persistence, unread counting, read/dismiss status, analytics aggregation, and in-memory fallback for unmigrated environments.
+  - Implemented smart alert deduplication logic inside `evaluateAndCreateAlert` triggering alerts ONLY on state transitions (🔴 Critical, 🟠 Approaching, 🟢 Recovery).
+  - Integrated notification evaluation into [`recalculationService`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/backend/src/services/recalculation.service.ts).
+- **Backend Express REST Routes**:
+  - Implemented [`notification.controller.ts`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/backend/src/controllers/notification.controller.ts) and [`notification.routes.ts`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/backend/src/routes/notification.routes.ts) mounted at `/api/notifications` in [`server.ts`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/backend/src/server.ts).
+- **Frontend Notification UI**:
+  - Created [`NotificationBell.tsx`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/frontend/src/components/NotificationBell.tsx) with pulsing unread badge counter, desktop dropdown, mobile bottom-sheet, tabs, and 4 explicit UI states.
+  - Created [`NotificationToastContainer.tsx`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/frontend/src/components/NotificationToastContainer.tsx) for live floating early warning alerts.
+  - Created [`EarlyWarningDashboard.tsx`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/frontend/src/components/EarlyWarningDashboard.tsx) featuring Critical Defaulters, Near-Threshold Students, Recovered Students, and quick "Inspect Student Profile" action.
+  - Updated [`AppHeader.tsx`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/frontend/src/components/AppHeader.tsx), [`App.tsx`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/frontend/src/App.tsx), [`client.ts`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/frontend/src/api/client.ts), and [`index.css`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/frontend/src/index.css).
+
+### Metrics
+- Frontend Build: 220.40 KB (gzip: 62.02 KB)
+- Zero TypeScript errors across `/shared`, `/backend`, and `/frontend`.
+- Complete Playwright browser verification passed.

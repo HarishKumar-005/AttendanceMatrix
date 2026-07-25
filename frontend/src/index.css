@@ -749,6 +749,120 @@ button:focus-visible {
   display: none;
 }
 
+/* ===== Teacher Notification Center Styling ===== */
+.notif-badge-pulse {
+  background: #f43f5e;
+  color: #ffffff;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  padding: 0.125rem 0.375rem;
+  border-radius: 9999px;
+  line-height: 1;
+  box-shadow: 0 0 0 2px rgba(244, 63, 94, 0.4);
+  animation: pulseNotif 2s infinite;
+}
+
+@keyframes pulseNotif {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.7); }
+  70% { transform: scale(1.05); box-shadow: 0 0 0 6px rgba(244, 63, 94, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); }
+}
+
+.notif-panel-container {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  width: 420px;
+  max-height: 520px;
+  background: #0f172a;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: dropdownFadeIn 0.15s ease-out;
+}
+
+@keyframes dropdownFadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.notif-panel-header {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(15, 23, 42, 0.95);
+}
+
+.notif-controls-bar {
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(15, 23, 42, 0.8);
+}
+
+.notif-panel-body {
+  padding: 0.625rem;
+  overflow-y: auto;
+  max-height: 400px;
+}
+
+/* Toast Container Floating Setup */
+.toast-container-wrapper {
+  position: fixed;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  max-width: 380px;
+  width: calc(100vw - 2.5rem);
+}
+
+.toast-card {
+  background: #0f172a;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.875rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  animation: toastSlideUp 0.25s ease-out;
+}
+
+.toast-severity-critical {
+  border-left: 4px solid #f43f5e;
+  background: rgba(244, 63, 94, 0.08);
+}
+
+.toast-severity-warning {
+  border-left: 4px solid #f59e0b;
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.toast-severity-recovery {
+  border-left: 4px solid #10b981;
+  background: rgba(16, 185, 129, 0.08);
+}
+
+@keyframes toastSlideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (min-width: 1025px) {
+  .bell-label-desktop {
+    display: inline !important;
+  }
+}
+
 /* ========================================================= */
 /* COMPREHENSIVE RESPONSIVE ARCHITECTURE & MEDIA QUERIES      */
 /* ========================================================= */
@@ -795,6 +909,26 @@ button:focus-visible {
   .app-container {
     padding: 0.375rem;
     overflow-x: hidden;
+  }
+
+  .notif-panel-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: auto;
+    width: 100%;
+    max-height: 80vh;
+    max-height: 80dvh;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    z-index: 150;
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.6);
+    animation: drawerSlideUp 0.25s ease-out;
+  }
+
+  .notif-panel-body {
+    max-height: 60vh;
+    max-height: 60dvh;
   }
 
   .filter-grid {

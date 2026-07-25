@@ -20,8 +20,9 @@ export const StudentRoster: React.FC<StudentRosterProps> = ({
 }) => {
   return (
     <div className="glass-panel" style={{ overflow: 'hidden' }}>
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
+      {/* Desktop & Tablet Table View (≥ 641px) */}
+      <div className="roster-table-wrapper" style={{ overflowX: 'auto' }}>
+        <table className="roster-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
           <thead>
             <tr style={{
               background: 'rgba(15, 23, 42, 0.9)',

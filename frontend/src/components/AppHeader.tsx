@@ -14,15 +14,14 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   activeTab,
   onTabChange,
   metrics: _metrics,
-
   onOpenAddModal,
 }) => {
   return (
     <header className="glass-panel" style={{ padding: '0.875rem 1.25rem', marginBottom: '1rem' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+      <div className="app-header-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
         {/* Brand & Subtitle */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <GraduationCap style={{ width: '1.25rem', height: '1.25rem', color: 'var(--primary)' }} />
+          <GraduationCap style={{ width: '1.25rem', height: '1.25rem', color: 'var(--primary)', flexShrink: 0 }} />
           <div>
             <h1 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#ffffff', lineHeight: 1.2 }}>
               AttendanceMatrix
@@ -33,10 +32,8 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           </div>
         </div>
 
-
-
         {/* Mode Switcher Tabs & Quick Action */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <div className="app-header-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <div className="nav-tab-group">
             <button
               type="button"
@@ -44,7 +41,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               onClick={() => onTabChange('workspace')}
             >
               <CheckSquare style={{ width: '0.875rem', height: '0.875rem' }} />
-              Attendance Workspace
+              Workspace
             </button>
 
             <button
@@ -53,7 +50,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               onClick={() => onTabChange('history')}
             >
               <History style={{ width: '0.875rem', height: '0.875rem' }} />
-              Attendance History
+              History Log
             </button>
           </div>
 

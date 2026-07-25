@@ -6,6 +6,7 @@ import recordsRoutes from './routes/records.routes.js';
 import studentsRoutes from './routes/students.routes.js';
 import attendanceRoutes from './routes/attendance.routes.js';
 import notificationRoutes from './routes/notification.routes.js';
+import { notificationService } from './services/notification.service.js';
 import { errorHandler, AppError } from './middleware/error-handler.js';
 
 const app = express();
@@ -32,10 +33,18 @@ app.use(errorHandler);
 const PORT = env.PORT;
 
 if (process.env.NODE_ENV !== 'test') {
-  app.listen(PORT, () => {
+  app.listen(PORT, async () => {
     console.log(`[AttendanceMatrix Backend] Server running on port ${PORT}`);
     console.log(`[AttendanceMatrix Backend] Environment: ${env.NODE_ENV}`);
     console.log(`[AttendanceMatrix Backend] Supabase URL: ${env.SUPABASE_URL}`);
+
+    // Trigger Initial Notification Synchronization for pre-seeded At-Risk students
+    try {
+      await notificationService.syncExistingStudentAlerts();
+      console.log(`[AttendanceMatrix Backend] Initial Early Warning notification sync complete.`);
+    } catch (syncErr) {
+      console.warn(`[AttendanceMatrix Backend] Notice during initial notification sync:`, syncErr);
+    }
   });
 }
 

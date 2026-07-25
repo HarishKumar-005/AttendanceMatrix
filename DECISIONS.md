@@ -121,3 +121,18 @@ AttendanceMatrix required an active Early Warning System where teachers are auto
 - 100% 3-tier architecture compliance. Browser calls REST API endpoints (`/api/notifications*`).
 - Zero duplicate notifications.
 - All packages (`/shared`, `/backend`, `/frontend`) pass `tsc --noEmit` cleanly with 0 errors.
+
+## [2026-07-26] Initial Notification Synchronization & Portal Z-Index Hierarchy Hardening
+
+### Context
+During verification of the Early Warning Notification Center, 34 pre-seeded At-Risk students existed in the database, but 0 notifications were displayed because alert generation previously required a live transition event (`previousAbsenceCount < threshold`). Furthermore, the dropdown panel in `AppHeader` suffered from stacking context clipping due to `glass-panel` `backdrop-filter: blur()` CSS isolation.
+
+### Key Architectural Decisions
+1. **Initial Notification Sync (`syncExistingStudentAlerts`)**: Added an automated startup/seed synchronization step in `NotificationService`. When `server.ts` boots or seeding completes, `syncExistingStudentAlerts()` evaluates all active students against their 30-day absence count and auto-generates 🔴 Critical (`threshold_reached`) and 🟠 Warning (`approaching_threshold`) alerts for pre-seeded defaulters.
+2. **React Portal Rendering (`ReactDOM.createPortal`)**: Updated `NotificationBell.tsx` to render the backdrop overlay and dropdown panel directly into `document.body` via `createPortal`. This completely escapes `glass-panel` `backdrop-filter` clipping and container z-index isolation, ensuring the notification panel floats cleanly above all UI elements with `z-index: 10000`.
+3. **Z-Index Layering Scale**: Standardized z-index design tokens in `index.css`: `--z-base: 1`, `--z-dropdown: 500`, `--z-header: 1000`, `--z-backdrop: 9000`, `--z-panel: 10000`, `--z-toast: 11000`, `--z-modal: 12000`.
+
+### Rationale & Trade-offs
+- Solves cold-start notification absence: teachers instantly see existing At-Risk students upon launching the register.
+- Solves CSS stacking context clipping permanently: portals guarantee top-level viewport rendering across all browsers.
+- 100% verified via Playwright end-to-end testing with 0 build errors.

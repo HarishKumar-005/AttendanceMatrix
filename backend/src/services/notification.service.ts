@@ -6,49 +6,58 @@ import {
   NotificationAnalytics,
   StudentSummary,
 } from '../types/index.js';
+import { recalculationService } from './recalculation.service.js';
 
-// In-memory fallback store for offline/unmigrated Supabase environments
-const inMemoryStore: TeacherNotification[] = [
-  {
-    id: 'notif-seed-1',
-    student_id: 'stu-1027',
-    student_name: 'Lakshmi Prasanna',
-    student_code: 'STU-1027',
-    class_section: '10A',
-    title: 'Critical Early Warning: Lakshmi Prasanna',
-    message: 'Lakshmi Prasanna (10A) has reached 5 absences during the last 30 days (threshold: 5). Attendance: 72.0%.',
-    severity: 'critical',
-    notification_type: 'threshold_reached',
-    is_read: false,
-    is_dismissed: false,
-    created_at: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
-    read_at: null,
-    metadata: { absences_last_30_days: 5, threshold: 5, attendance_percentage: 72.0, is_defaulter: true },
-    triggered_by: 'recalculation_engine',
-    recommendation: 'Schedule a student counselling session & contact parent/guardian.',
-  },
-  {
-    id: 'notif-seed-2',
-    student_id: 'stu-1029',
-    student_name: 'Srinivas Raghavan',
-    student_code: 'STU-1029',
-    class_section: '10A',
-    title: 'Approaching Threshold: Srinivas Raghavan',
-    message: 'Srinivas Raghavan (10A) has reached 4 absences in the last 30 days (1 away from threshold of 5).',
-    severity: 'warning',
-    notification_type: 'approaching_threshold',
-    is_read: false,
-    is_dismissed: false,
-    created_at: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
-    read_at: null,
-    metadata: { absences_last_30_days: 4, threshold: 5, attendance_percentage: 78.5, is_defaulter: false },
-    triggered_by: 'recalculation_engine',
-    recommendation: 'Issue an informal attendance reminder and verify reason for recent absence.',
-  },
-];
+// In-memory store for active notifications
+const inMemoryStore: TeacherNotification[] = [];
+let isSyncing = false;
+let hasInitialSynced = false;
 
 export class NotificationService {
-  private useInMemory = false;
+  private useInMemory = true; // Default to robust in-memory storage with DB persistence sync
+
+  /**
+   * Authoritative Initial Notification Sync (Phase 3 requirement):
+   * Scans all students in database. Computes rolling 30-day calculation for each student.
+   * Generates notifications for all existing At-Risk (>= 5 absences) or Near-Threshold (4 absences) students.
+   */
+  public async syncExistingStudentAlerts(force = false): Promise<void> {
+    if (isSyncing || (hasInitialSynced && !force && inMemoryStore.length > 0)) return;
+    isSyncing = true;
+
+    try {
+      // 1. Query all active students from master table
+      const { data: students } = await supabase
+        .from('students')
+        .select('id');
+
+      if (!students || students.length === 0) {
+        isSyncing = false;
+        hasInitialSynced = true;
+        return;
+      }
+
+      // 2. Perform recalculation for each student and create alerts for At-Risk / Near-Threshold students
+      for (const student of students) {
+        try {
+          const summary = await recalculationService.recalculateForStudent(student.id);
+          const threshold = summary.absence_threshold || 5;
+
+          if (summary.is_defaulter || summary.absences_last_30_days >= threshold - 1) {
+            await this.evaluateAndCreateAlert(summary, undefined, true);
+          }
+        } catch {
+          // Continue scanning next student
+        }
+      }
+
+      hasInitialSynced = true;
+    } catch (err) {
+      console.warn('[NotificationService] Initial sync notice:', err);
+    } finally {
+      isSyncing = false;
+    }
+  }
 
   /**
    * Fetches paginated notification records from database (with in-memory fallback).
@@ -59,13 +68,14 @@ export class NotificationService {
     page?: number;
     limit?: number;
   }): Promise<{ notifications: TeacherNotification[]; total: number; unread_count: number }> {
-    if (this.useInMemory) {
-      return this.getInMemoryNotifications(options);
+    if (!hasInitialSynced || inMemoryStore.length === 0) {
+      await this.syncExistingStudentAlerts(true);
     }
 
     try {
+      // 1. Try querying Supabase teacher_notifications table
       const page = options.page || 1;
-      const limit = options.limit || 20;
+      const limit = options.limit || 100;
       const offset = (page - 1) * limit;
 
       let query = (supabase.from('teacher_notifications' as any) as any)
@@ -84,32 +94,23 @@ export class NotificationService {
 
       const { data, count, error } = await query;
 
-      if (error) {
-        if (error.message.includes('schema cache') || error.code === 'PGRST205' || error.code === '42P01') {
-          console.warn('[NotificationService] Supabase teacher_notifications table missing. Falling back to in-memory store.');
-          this.useInMemory = true;
-          return this.getInMemoryNotifications(options);
-        }
-        throw new Error(`Failed to fetch notifications: ${error.message}`);
-      }
+      if (!error && data && data.length > 0) {
+        const { count: unreadCount } = await (supabase.from('teacher_notifications' as any) as any)
+          .select('*', { count: 'exact', head: true })
+          .eq('is_dismissed', false)
+          .eq('is_read', false);
 
-      const { count: unreadCount } = await (supabase.from('teacher_notifications' as any) as any)
-        .select('*', { count: 'exact', head: true })
-        .eq('is_dismissed', false)
-        .eq('is_read', false);
-
-      return {
-        notifications: (data as TeacherNotification[]) || [],
-        total: count || 0,
-        unread_count: unreadCount || 0,
-      };
-    } catch (err: any) {
-      if (err.message && err.message.includes('schema cache')) {
-        this.useInMemory = true;
-        return this.getInMemoryNotifications(options);
+        return {
+          notifications: (data as TeacherNotification[]) || [],
+          total: count || 0,
+          unread_count: unreadCount || 0,
+        };
       }
-      throw err;
+    } catch {
+      // Fallback to in-memory store
     }
+
+    return this.getInMemoryNotifications(options);
   }
 
   private getInMemoryNotifications(options: {
@@ -137,8 +138,8 @@ export class NotificationService {
    * Fast unread count query.
    */
   public async getUnreadCount(): Promise<number> {
-    if (this.useInMemory) {
-      return inMemoryStore.filter((n) => !n.is_dismissed && !n.is_read).length;
+    if (!hasInitialSynced || inMemoryStore.length === 0) {
+      await this.syncExistingStudentAlerts(true);
     }
 
     try {
@@ -147,16 +148,14 @@ export class NotificationService {
         .eq('is_dismissed', false)
         .eq('is_read', false);
 
-      if (error) {
-        this.useInMemory = true;
-        return inMemoryStore.filter((n) => !n.is_dismissed && !n.is_read).length;
+      if (!error && count !== null && count > 0) {
+        return count;
       }
-
-      return count || 0;
     } catch {
-      this.useInMemory = true;
-      return inMemoryStore.filter((n) => !n.is_dismissed && !n.is_read).length;
+      // Fallback
     }
+
+    return inMemoryStore.filter((n) => !n.is_dismissed && !n.is_read).length;
   }
 
   /**
@@ -165,14 +164,10 @@ export class NotificationService {
   public async markAsRead(id: string): Promise<TeacherNotification | null> {
     const nowStr = new Date().toISOString();
 
-    if (this.useInMemory) {
-      const target = inMemoryStore.find((n) => n.id === id);
-      if (target) {
-        target.is_read = true;
-        target.read_at = nowStr;
-        return target;
-      }
-      return null;
+    const inMemTarget = inMemoryStore.find((n) => n.id === id);
+    if (inMemTarget) {
+      inMemTarget.is_read = true;
+      inMemTarget.read_at = nowStr;
     }
 
     try {
@@ -185,25 +180,14 @@ export class NotificationService {
         .select()
         .single();
 
-      if (error) {
-        const target = inMemoryStore.find((n) => n.id === id);
-        if (target) {
-          target.is_read = true;
-          target.read_at = nowStr;
-          return target;
-        }
+      if (!error && data) {
+        return data as TeacherNotification;
       }
-
-      return data as TeacherNotification;
     } catch {
-      const target = inMemoryStore.find((n) => n.id === id);
-      if (target) {
-        target.is_read = true;
-        target.read_at = nowStr;
-        return target;
-      }
-      return null;
+      // Fallback
     }
+
+    return inMemTarget || null;
   }
 
   /**
@@ -211,18 +195,15 @@ export class NotificationService {
    */
   public async markAllAsRead(): Promise<number> {
     const nowStr = new Date().toISOString();
+    let count = 0;
 
-    if (this.useInMemory) {
-      let count = 0;
-      inMemoryStore.forEach((n) => {
-        if (!n.is_dismissed && !n.is_read) {
-          n.is_read = true;
-          n.read_at = nowStr;
-          count++;
-        }
-      });
-      return count;
-    }
+    inMemoryStore.forEach((n) => {
+      if (!n.is_dismissed && !n.is_read) {
+        n.is_read = true;
+        n.read_at = nowStr;
+        count++;
+      }
+    });
 
     try {
       const { data, error } = await (supabase.from('teacher_notifications' as any) as any)
@@ -234,78 +215,47 @@ export class NotificationService {
         .eq('is_read', false)
         .select('id');
 
-      if (error) {
-        let count = 0;
-        inMemoryStore.forEach((n) => {
-          if (!n.is_dismissed && !n.is_read) {
-            n.is_read = true;
-            n.read_at = nowStr;
-            count++;
-          }
-        });
-        return count;
+      if (!error && data) {
+        return Math.max(data.length, count);
       }
-
-      return data ? data.length : 0;
     } catch {
-      let count = 0;
-      inMemoryStore.forEach((n) => {
-        if (!n.is_dismissed && !n.is_read) {
-          n.is_read = true;
-          n.read_at = nowStr;
-          count++;
-        }
-      });
-      return count;
+      // Fallback
     }
+
+    return count;
   }
 
   /**
    * Soft-deletes / dismisses a single notification.
    */
   public async dismissNotification(id: string): Promise<boolean> {
-    if (this.useInMemory) {
-      const target = inMemoryStore.find((n) => n.id === id);
-      if (target) {
-        target.is_dismissed = true;
-      }
-      return true;
+    const target = inMemoryStore.find((n) => n.id === id);
+    if (target) {
+      target.is_dismissed = true;
     }
 
     try {
       await (supabase.from('teacher_notifications' as any) as any)
         .update({ is_dismissed: true })
         .eq('id', id);
-
-      const target = inMemoryStore.find((n) => n.id === id);
-      if (target) {
-        target.is_dismissed = true;
-      }
-
-      return true;
     } catch {
-      const target = inMemoryStore.find((n) => n.id === id);
-      if (target) {
-        target.is_dismissed = true;
-      }
-      return true;
+      // Fallback
     }
+
+    return true;
   }
 
   /**
    * Soft-deletes / clears all active notifications.
    */
   public async clearAllNotifications(): Promise<number> {
-    if (this.useInMemory) {
-      let count = 0;
-      inMemoryStore.forEach((n) => {
-        if (!n.is_dismissed) {
-          n.is_dismissed = true;
-          count++;
-        }
-      });
-      return count;
-    }
+    let count = 0;
+    inMemoryStore.forEach((n) => {
+      if (!n.is_dismissed) {
+        n.is_dismissed = true;
+        count++;
+      }
+    });
 
     try {
       const { data, error } = await (supabase.from('teacher_notifications' as any) as any)
@@ -313,35 +263,26 @@ export class NotificationService {
         .eq('is_dismissed', false)
         .select('id');
 
-      if (error) {
-        let count = 0;
-        inMemoryStore.forEach((n) => {
-          if (!n.is_dismissed) {
-            n.is_dismissed = true;
-            count++;
-          }
-        });
-        return count;
+      if (!error && data) {
+        return Math.max(data.length, count);
       }
-
-      return data ? data.length : 0;
     } catch {
-      let count = 0;
-      inMemoryStore.forEach((n) => {
-        if (!n.is_dismissed) {
-          n.is_dismissed = true;
-          count++;
-        }
-      });
-      return count;
+      // Fallback
     }
+
+    return count;
   }
 
   /**
    * Returns analytics summary for Early Warning Dashboard.
    */
   public async getNotificationAnalytics(): Promise<NotificationAnalytics> {
-    const list = this.useInMemory ? inMemoryStore.filter((n) => !n.is_dismissed) : (await this.getNotifications({})).notifications;
+    if (!hasInitialSynced || inMemoryStore.length === 0) {
+      await this.syncExistingStudentAlerts(true);
+    }
+
+    const res = await this.getNotifications({ limit: 200 });
+    const list = res.notifications;
 
     const unreadCount = list.filter((n) => !n.is_read).length;
     const criticalCount = list.filter((n) => n.severity === 'critical').length;
@@ -371,7 +312,8 @@ export class NotificationService {
    */
   public async evaluateAndCreateAlert(
     summary: StudentSummary,
-    previousAbsenceCount?: number
+    previousAbsenceCount?: number,
+    isInitialSync = false
   ): Promise<TeacherNotification | null> {
     const {
       student_id,
@@ -390,8 +332,8 @@ export class NotificationService {
     let message = '';
     let recommendation = '';
 
-    // Determine state transition
-    if (is_defaulter && (previousAbsenceCount === undefined || previousAbsenceCount < absence_threshold)) {
+    // Determine state transition or initial sync condition
+    if (is_defaulter && (isInitialSync || previousAbsenceCount === undefined || previousAbsenceCount < absence_threshold)) {
       // 🔴 CRITICAL: Crossed or reached threshold
       targetType = 'threshold_reached';
       severity = 'critical';
@@ -400,8 +342,8 @@ export class NotificationService {
       recommendation = `Schedule a student counselling session & contact parent/guardian.`;
     } else if (
       !is_defaulter &&
-      absences_last_30_days === absence_threshold - 1 &&
-      (previousAbsenceCount === undefined || previousAbsenceCount < absence_threshold - 1)
+      absences_last_30_days >= absence_threshold - 1 &&
+      (isInitialSync || previousAbsenceCount === undefined || previousAbsenceCount < absence_threshold - 1)
     ) {
       // 🟠 WARNING: Approaching threshold (1 away)
       targetType = 'approaching_threshold';
@@ -426,16 +368,15 @@ export class NotificationService {
       return null;
     }
 
-    // Deduplication check: Has a notification of the same type been generated for this student in the last 24h?
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).getTime();
-    const existingRecent = inMemoryStore.find(
+    // Deduplication check: Has an active notification of the same type already been generated for this student?
+    const existingActive = inMemoryStore.find(
       (n) =>
         n.student_id === student_id &&
         n.notification_type === targetType &&
-        new Date(n.created_at).getTime() >= twentyFourHoursAgo
+        !n.is_dismissed
     );
 
-    if (existingRecent) {
+    if (existingActive) {
       return null;
     }
 
@@ -466,12 +407,10 @@ export class NotificationService {
 
     inMemoryStore.unshift(payload);
 
-    if (!this.useInMemory) {
-      try {
-        await (supabase.from('teacher_notifications' as any) as any).insert(payload);
-      } catch {
-        this.useInMemory = true;
-      }
+    try {
+      await (supabase.from('teacher_notifications' as any) as any).insert(payload);
+    } catch {
+      // In-memory store remains primary fallback
     }
 
     return payload;

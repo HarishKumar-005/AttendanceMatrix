@@ -36,6 +36,15 @@
   --defaulter: #f43f5e;
   --defaulter-bg: rgba(244, 63, 94, 0.12);
 
+  /* Layering & Z-Index Standard Scale */
+  --z-base: 1;
+  --z-dropdown: 500;
+  --z-header: 1000;
+  --z-backdrop: 9000;
+  --z-panel: 10000;
+  --z-toast: 11000;
+  --z-modal: 12000;
+
   /* Layout tokens */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.25);
@@ -245,7 +254,7 @@ h1, h2, h3, h4, h5, h6 {
   inset: 0;
   background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(4px);
-  z-index: 50;
+  z-index: var(--z-modal);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -749,7 +758,7 @@ button:focus-visible {
   display: none;
 }
 
-/* ===== Teacher Notification Center Styling ===== */
+/* ===== Teacher Notification Center & Layering Hierarchy ===== */
 .notif-badge-pulse {
   background: #f43f5e;
   color: #ffffff;
@@ -768,17 +777,25 @@ button:focus-visible {
   100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); }
 }
 
+.notif-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(3px);
+  z-index: var(--z-backdrop);
+}
+
 .notif-panel-container {
-  position: absolute;
-  top: calc(100% + 0.5rem);
-  right: 0;
-  width: 420px;
-  max-height: 520px;
+  position: fixed;
+  top: 70px;
+  right: max(1rem, calc((100vw - 1320px) / 2 + 1rem));
+  width: 440px;
+  max-height: 540px;
   background: #0f172a;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  z-index: 100;
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.85);
+  z-index: var(--z-panel);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -796,7 +813,7 @@ button:focus-visible {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(15, 23, 42, 0.95);
+  background: rgba(15, 23, 42, 0.98);
 }
 
 .notif-controls-bar {
@@ -805,13 +822,13 @@ button:focus-visible {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(15, 23, 42, 0.9);
 }
 
 .notif-panel-body {
   padding: 0.625rem;
   overflow-y: auto;
-  max-height: 400px;
+  max-height: 420px;
 }
 
 /* Toast Container Floating Setup */
@@ -819,15 +836,17 @@ button:focus-visible {
   position: fixed;
   bottom: 1.25rem;
   right: 1.25rem;
-  z-index: 200;
+  z-index: var(--z-toast);
   display: flex;
   flex-direction: column;
   gap: 0.625rem;
   max-width: 380px;
   width: calc(100vw - 2.5rem);
+  pointer-events: none;
 }
 
 .toast-card {
+  pointer-events: auto;
   background: #0f172a;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
@@ -875,7 +894,7 @@ button:focus-visible {
     inset: 0;
     background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(4px);
-    z-index: 40;
+    z-index: var(--z-backdrop);
     animation: fadeIn 0.15s ease-out;
   }
 
@@ -888,7 +907,7 @@ button:focus-visible {
     max-height: 85vh;
     max-height: 85dvh;
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    z-index: 45;
+    z-index: var(--z-panel);
     animation: drawerSlideUp 0.25s ease-out;
     box-shadow: var(--shadow-lg);
   }
@@ -921,7 +940,7 @@ button:focus-visible {
     max-height: 80vh;
     max-height: 80dvh;
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    z-index: 150;
+    z-index: var(--z-panel);
     box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.6);
     animation: drawerSlideUp 0.25s ease-out;
   }

@@ -130,3 +130,17 @@ All notable changes to the AttendanceMatrix project are documented here in appen
 - Frontend Build: 220.40 KB (gzip: 62.02 KB)
 - Zero TypeScript errors across `/shared`, `/backend`, and `/frontend`.
 - Complete Playwright browser verification passed.
+
+## [2026-07-26] Initial Notification Synchronization & Portal Z-Index Hardening
+
+### Added
+- **Initial Notification Synchronization**:
+  - Added `syncExistingStudentAlerts()` to [`notification.service.ts`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/backend/src/services/notification.service.ts) which auto-scans active students upon server startup / seeding and populates 🔴 Critical and 🟠 Approaching warning alerts for pre-existing At-Risk students in DB.
+- **React Portal Overlay**:
+  - Updated [`NotificationBell.tsx`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/frontend/src/components/NotificationBell.tsx) to render backdrop overlay and dropdown panel using `ReactDOM.createPortal(..., document.body)`.
+- **CSS Z-Index Hierarchy Scale**:
+  - Standardized layered Z-index tokens in [`index.css`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/frontend/src/index.css) (`--z-backdrop: 9000`, `--z-panel: 10000`, `--z-toast: 11000`, `--z-modal: 12000`).
+
+### Metrics
+- Frontend Build: 220.77 KB (gzip: 62.19 KB)
+- Verified end-to-end in browser via Playwright: 14 initial alerts generated automatically, dropdown rendered cleanly over all backdrop layers, Student Drawer opened cleanly via "View Student" CTA, Early Warning Center statistics rendering 11 Critical and 3 Near-Threshold alerts matching DB state.

@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import {
   Bell,
   Check,
@@ -51,15 +52,29 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
 }) => {
   const panelRef = useRef<HTMLDivElement>(null);
 
-  // Close panel on outside click
+  // Close panel on outside click or Escape key
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
       if (isOpen && panelRef.current && !panelRef.current.contains(e.target as Node)) {
+        const targetEl = e.target as HTMLElement;
+        if (!targetEl.closest('.notif-bell-btn')) {
+          onClose();
+        }
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isOpen && e.key === 'Escape') {
         onClose();
       }
     };
+
     document.addEventListener('mousedown', handleOutsideClick);
-    return () => document.removeEventListener('mousedown', handleOutsideClick);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
   }, [isOpen, onClose]);
 
   const getSeverityIcon = (severity: NotificationSeverity) => {
@@ -79,7 +94,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
   const getSeverityBadge = (severity: NotificationSeverity) => {
     switch (severity) {
       case 'critical':
-        return <span className="badge badge-warning" style={{ background: 'rgba(244, 63, 94, 0.15)', color: '#fda4af' }}>Critical Risk</span>;
+        return <span className="badge badge-warning" style={{ background: 'rgba(244, 63, 94, 0.15)', color: '#fda4af' }}>Critical</span>;
       case 'warning':
         return <span className="badge badge-excused">Approaching</span>;
       case 'recovery':
@@ -99,39 +114,20 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
     return `${Math.floor(diffSeconds / 86400)}d ago`;
   };
 
-  return (
-    <div ref={panelRef} style={{ position: 'relative', display: 'inline-block' }}>
-      {/* Bell Button */}
-      <button
-        type="button"
-        className="btn btn-secondary notif-bell-btn"
-        onClick={onToggle}
-        title="Early Warning Notification Center"
-        aria-label="Early Warning Notifications"
-        style={{
-          position: 'relative',
-          padding: '0.4375rem 0.625rem',
-          minHeight: '36px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.375rem',
-        }}
-      >
-        <Bell style={{ width: '1.125rem', height: '1.125rem', color: unreadCount > 0 ? 'var(--primary)' : 'var(--text-secondary)' }} />
-        <span style={{ fontSize: '0.75rem', fontWeight: 600, display: 'none' }} className="bell-label-desktop">
-          Alerts
-        </span>
+  const renderDropdownOverlay = () => {
+    if (!isOpen) return null;
 
-        {unreadCount > 0 && (
-          <span className="notif-badge-pulse" title={`${unreadCount} unread early warning alerts`}>
-            {unreadCount > 99 ? '99+' : unreadCount}
-          </span>
-        )}
-      </button>
+    return ReactDOM.createPortal(
+      <>
+        {/* Backdrop Layer */}
+        <div
+          className="notif-backdrop"
+          onClick={onClose}
+          aria-hidden="true"
+        />
 
-      {/* Notification Dropdown Panel / Bottom Sheet */}
-      {isOpen && (
-        <div className="notif-panel-container glass-panel">
+        {/* Notification Dropdown Panel / Bottom Sheet */}
+        <div ref={panelRef} className="notif-panel-container glass-panel">
           {/* Panel Header */}
           <div className="notif-panel-header">
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -160,7 +156,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
                 onClick={() => onTabChange('all')}
                 style={{ padding: '0.25rem 0.625rem', fontSize: '0.75rem', minHeight: '28px' }}
               >
-                All
+                All ({notifications.length})
               </button>
               <button
                 type="button"
@@ -249,8 +245,8 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
                     style={{
                       padding: '0.75rem',
                       borderRadius: 'var(--radius-sm)',
-                      background: !item.is_read ? 'rgba(99, 102, 241, 0.06)' : 'rgba(15, 23, 42, 0.4)',
-                      border: !item.is_read ? '1px solid rgba(99, 102, 241, 0.2)' : '1px solid var(--border-color)',
+                      background: !item.is_read ? 'rgba(99, 102, 241, 0.08)' : 'rgba(15, 23, 42, 0.4)',
+                      border: !item.is_read ? '1px solid rgba(99, 102, 241, 0.3)' : '1px solid var(--border-color)',
                       transition: 'background-color 0.15s ease',
                       position: 'relative',
                     }}
@@ -326,7 +322,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
                             style={{ padding: '0.1875rem 0.375rem', fontSize: '0.6875rem', minHeight: '26px' }}
                             title="Mark as read"
                           >
-                            <Check style={{ width: '0.6875rem', height: '0.6875rem' }} />
+                            <Check style={{ width: '0.6875rem', height: '0.6875rem', color: 'var(--present)' }} />
                           </button>
                         )}
 
@@ -347,7 +343,43 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
             )}
           </div>
         </div>
-      )}
+      </>,
+      document.body
+    );
+  };
+
+  return (
+    <div style={{ position: 'relative', display: 'inline-block' }}>
+      {/* Bell Button */}
+      <button
+        type="button"
+        className="btn btn-secondary notif-bell-btn"
+        onClick={onToggle}
+        title="Early Warning Notification Center"
+        aria-label="Early Warning Notifications"
+        style={{
+          position: 'relative',
+          padding: '0.4375rem 0.625rem',
+          minHeight: '36px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.375rem',
+        }}
+      >
+        <Bell style={{ width: '1.125rem', height: '1.125rem', color: unreadCount > 0 ? 'var(--primary)' : 'var(--text-secondary)' }} />
+        <span style={{ fontSize: '0.75rem', fontWeight: 600, display: 'none' }} className="bell-label-desktop">
+          Alerts
+        </span>
+
+        {unreadCount > 0 && (
+          <span className="notif-badge-pulse" title={`${unreadCount} unread early warning alerts`}>
+            {unreadCount > 99 ? '99+' : unreadCount}
+          </span>
+        )}
+      </button>
+
+      {/* Render Dropdown via React Portal */}
+      {renderDropdownOverlay()}
     </div>
   );
 };

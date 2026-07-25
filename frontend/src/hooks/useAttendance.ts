@@ -42,11 +42,13 @@ export function useAttendance() {
     setError(null);
     try {
       const data = await fetchRecords(currentFilters);
-      setRecords(data.records);
-      setMetrics(data.metrics);
+      setRecords(data?.records ?? []);
+      setMetrics(data?.metrics ?? initialMetrics);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to load attendance records';
       setError(msg);
+      setRecords([]);
+      setMetrics(initialMetrics);
     } finally {
       setLoading(false);
     }

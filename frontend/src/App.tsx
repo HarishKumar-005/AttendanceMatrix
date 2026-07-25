@@ -25,7 +25,7 @@ export const App: React.FC = () => {
     saveRecord,
   } = useAttendance();
 
-  const isEmptyState = !loading && !error && records.length === 0;
+  const isEmptyState = !loading && !error && (records ?? []).length === 0;
 
   return (
     <div className="app-container">

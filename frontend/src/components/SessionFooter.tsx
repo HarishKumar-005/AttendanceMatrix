@@ -17,10 +17,13 @@ export const SessionFooter: React.FC<SessionFooterProps> = ({
 
   return (
     <div
+      className="session-footer-bar"
       style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '0.75rem',
         padding: '0.875rem 1.25rem',
         marginTop: '0.875rem',
         backgroundColor: 'var(--bg-card-solid)',
@@ -36,7 +39,7 @@ export const SessionFooter: React.FC<SessionFooterProps> = ({
             {successMessage}
           </span>
         ) : (
-          <span style={{ color: 'var(--text-muted)' }}>
+          <span className="keyboard-shortcuts-text" style={{ color: 'var(--text-muted)' }}>
             Keyboard Shortcuts: <kbd className="shortcut-key">P</kbd>/<kbd className="shortcut-key">A</kbd>/<kbd className="shortcut-key">E</kbd> for status · <kbd className="shortcut-key">↑</kbd><kbd className="shortcut-key">↓</kbd> for rows · <kbd className="shortcut-key">Ctrl+S</kbd> to save
           </span>
         )}
@@ -44,7 +47,7 @@ export const SessionFooter: React.FC<SessionFooterProps> = ({
 
       <button
         type="button"
-        className="btn btn-primary"
+        className="btn btn-primary session-save-btn"
         onClick={onSaveSession}
         disabled={isSaving}
         style={{ padding: '0.625rem 1.25rem', fontSize: '0.875rem', fontWeight: 700 }}

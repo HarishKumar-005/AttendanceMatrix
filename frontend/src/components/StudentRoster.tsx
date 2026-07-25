@@ -20,9 +20,9 @@ export const StudentRoster: React.FC<StudentRosterProps> = ({
 }) => {
   return (
     <div className="glass-panel" style={{ overflow: 'hidden' }}>
-      {/* Desktop & Tablet Table View (≥ 641px) */}
-      <div className="roster-table-wrapper" style={{ overflowX: 'auto' }}>
-        <table className="roster-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
+      {/* Desktop & Tablet High-Density Table View (≥ 641px) */}
+      <div className="roster-table-view" style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
           <thead>
             <tr style={{
               background: 'rgba(15, 23, 42, 0.9)',
@@ -139,6 +139,92 @@ export const StudentRoster: React.FC<StudentRosterProps> = ({
             })}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Card List View (≤ 640px) */}
+      <div className="roster-mobile-card-list">
+        {roster.map((student, idx) => {
+          const isSelected = student.student_id === selectedStudentId;
+
+          return (
+            <div
+              key={student.student_id}
+              className={`roster-mobile-card ${student.is_defaulter ? 'table-row-defaulter' : ''} ${isSelected ? 'row-selected' : ''}`}
+              onClick={() => {
+                onFocusRow(idx);
+                onStudentClick(student.student_id, student.student_name, student.student_code, student.class_section);
+              }}
+            >
+              {/* Header: Index, Avatar, Name, Code, Risk */}
+              <div className="roster-mobile-card-header">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, width: '1.25rem' }}>
+                    #{idx + 1}
+                  </span>
+                  <div style={{
+                    width: '2rem',
+                    height: '2rem',
+                    borderRadius: '50%',
+                    backgroundColor: isSelected ? 'rgba(99, 102, 241, 0.3)' : 'rgba(99, 102, 241, 0.15)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'var(--primary)',
+                    fontWeight: 700,
+                    fontSize: '0.75rem',
+                    flexShrink: 0
+                  }}>
+                    {student.student_name.slice(0, 2).toUpperCase()}
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--text-primary)' }}>
+                      {student.student_name}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                      {student.student_code}
+                    </div>
+                  </div>
+                </div>
+
+                {student.is_defaulter && (
+                  <span className="badge badge-warning">At-Risk</span>
+                )}
+              </div>
+
+              {/* Status Segmented Buttons for Mobile */}
+              <div style={{ marginTop: '0.625rem' }} onClick={(e) => e.stopPropagation()}>
+                <div className="status-toggle-group" style={{ width: '100%', display: 'flex' }}>
+                  <button
+                    type="button"
+                    className={`status-toggle-btn toggle-present ${student.status === 'present' ? 'active' : ''}`}
+                    onClick={() => onStatusToggle(student.student_id, 'present')}
+                    style={{ flex: 1, minHeight: '40px' }}
+                  >
+                    Present
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`status-toggle-btn toggle-absent ${student.status === 'absent' ? 'active' : ''}`}
+                    onClick={() => onStatusToggle(student.student_id, 'absent')}
+                    style={{ flex: 1, minHeight: '40px' }}
+                  >
+                    Absent
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`status-toggle-btn toggle-excused ${student.status === 'excused' ? 'active' : ''}`}
+                    onClick={() => onStatusToggle(student.student_id, 'excused')}
+                    style={{ flex: 1, minHeight: '40px' }}
+                  >
+                    Excused
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

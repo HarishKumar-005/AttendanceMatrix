@@ -24,6 +24,7 @@ export const AttendanceSessionBar: React.FC<AttendanceSessionBarProps> = ({
 }) => {
   return (
     <div
+      className="session-bar-container"
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -38,7 +39,7 @@ export const AttendanceSessionBar: React.FC<AttendanceSessionBarProps> = ({
       }}
     >
       {/* Enrolled & Status Breakdown */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+      <div className="session-bar-roster" style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
         <div>
           <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             Class Roster
@@ -48,7 +49,7 @@ export const AttendanceSessionBar: React.FC<AttendanceSessionBarProps> = ({
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', flexWrap: 'wrap' }}>
           <span className="badge badge-present">{presentCount} Present</span>
           <span className="badge badge-absent">{absentCount} Absent</span>
           {excusedCount > 0 && <span className="badge badge-excused">{excusedCount} Excused</span>}
@@ -56,7 +57,7 @@ export const AttendanceSessionBar: React.FC<AttendanceSessionBarProps> = ({
       </div>
 
       {/* Session State Badge & Quick Actions */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+      <div className="session-bar-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
         {sessionState === 'draft' && (
           <span className="badge badge-warning" style={{ gap: '0.375rem' }}>
             <AlertTriangle style={{ width: '0.75rem', height: '0.75rem' }} />
@@ -73,7 +74,7 @@ export const AttendanceSessionBar: React.FC<AttendanceSessionBarProps> = ({
 
         <button
           type="button"
-          className="btn btn-secondary"
+          className="btn btn-secondary mark-all-present-btn"
           onClick={onMarkAllPresent}
           style={{ padding: '0.375rem 0.75rem', fontSize: '0.8125rem' }}
           title="Set all student statuses in roster to Present"

@@ -28,8 +28,8 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
 
   return (
     <div className="glass-panel" style={{ overflow: 'hidden' }}>
-      {/* Desktop Table View */}
-      <div style={{ overflowX: 'auto' }}>
+      {/* Desktop & Tablet Table View (≥ 641px) */}
+      <div className="history-table-view" style={{ overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
           <thead>
             <tr style={{
@@ -138,6 +138,73 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
             })}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Card View (≤ 640px) */}
+      <div className="history-mobile-card-list">
+        {records.map((record) => {
+          const isSelected = record.student_id === selectedStudentId;
+
+          return (
+            <div
+              key={record.id}
+              className={`history-mobile-card ${record.is_defaulter ? 'table-row-defaulter' : ''} ${isSelected ? 'row-selected' : ''}`}
+              onClick={() => onStudentClick(record)}
+            >
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+                  <div style={{
+                    width: '2rem',
+                    height: '2rem',
+                    borderRadius: '50%',
+                    backgroundColor: isSelected ? 'rgba(99, 102, 241, 0.3)' : 'rgba(99, 102, 241, 0.15)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'var(--primary)',
+                    fontWeight: 700,
+                    fontSize: '0.75rem',
+                    flexShrink: 0
+                  }}>
+                    {record.student_name.slice(0, 2).toUpperCase()}
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--text-primary)' }}>
+                      {record.student_name}
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                      {record.student_code} · Class {record.class_section}
+                    </div>
+                  </div>
+                </div>
+
+                {record.is_defaulter && (
+                  <span className="badge badge-warning">At-Risk</span>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid var(--border-color)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{record.date}</span>
+                  {getStatusBadge(record.status)}
+                </div>
+
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEditRecord(record);
+                  }}
+                  style={{ padding: '0.375rem 0.75rem', fontSize: '0.75rem', minHeight: '36px' }}
+                >
+                  <Edit2 style={{ width: '0.75rem', height: '0.75rem' }} />
+                  Edit
+                </button>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

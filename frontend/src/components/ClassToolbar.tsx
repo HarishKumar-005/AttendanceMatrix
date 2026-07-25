@@ -27,27 +27,28 @@ export const ClassToolbar: React.FC<ClassToolbarProps> = ({
 }) => {
   return (
     <div className="class-selector-strip">
-      <div className="class-pills-container">
-        {CLASS_SECTIONS.map((sec) => (
-          <button
-            key={sec.value}
-            type="button"
-            className={`class-pill ${activeClass === sec.value || activeClass === `Class ${sec.label}` ? 'active' : ''}`}
-            onClick={() => onClassChange(sec.value)}
-          >
-            {sec.label}
-          </button>
-        ))}
+      <div className="class-pills-scroll-wrapper">
+        <div className="class-pills-container">
+          {CLASS_SECTIONS.map((sec) => (
+            <button
+              key={sec.value}
+              type="button"
+              className={`class-pill ${activeClass === sec.value || activeClass === `Class ${sec.label}` ? 'active' : ''}`}
+              onClick={() => onClassChange(sec.value)}
+            >
+              {sec.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="class-date-control">
-        <Calendar style={{ width: '0.875rem', height: '0.875rem', color: 'var(--text-muted)', flexShrink: 0 }} />
+        <Calendar style={{ width: '0.875rem', height: '0.875rem', color: 'var(--primary)', flexShrink: 0 }} />
         <input
           type="date"
-          className="input-control"
+          className="input-control class-date-input"
           value={activeDate}
           onChange={(e) => onDateChange(e.target.value)}
-          style={{ width: '9rem', padding: '0.375rem 0.5rem', fontSize: '0.8125rem' }}
         />
       </div>
     </div>

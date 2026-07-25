@@ -44,6 +44,32 @@ export const getRecordsQuerySchema = z.object({
   limit: z.string().optional().transform((val) => (val ? parseInt(val, 10) : 20)),
 });
 
+export const getSessionQuerySchema = z.object({
+  class_section: z.string({ required_error: 'class_section is required' }).min(1, 'class_section cannot be blank'),
+  date: z
+    .string({ required_error: 'date is required' })
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'date must be in YYYY-MM-DD format'),
+});
+
+export const sessionRosterEntrySchema = z.object({
+  student_id: z.string({ required_error: 'student_id is required' }).min(1),
+  student_code: z.string({ required_error: 'student_code is required' }),
+  student_name: z.string({ required_error: 'student_name is required' }),
+  status: attendanceStatusEnum,
+  remarks: z.string().max(500).optional().nullable(),
+});
+
+export const saveSessionSchema = z.object({
+  class_section: z.string({ required_error: 'class_section is required' }).min(1),
+  date: z
+    .string({ required_error: 'date is required' })
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'date must be in YYYY-MM-DD format'),
+  records: z.array(sessionRosterEntrySchema, { required_error: 'records array is required' }),
+});
+
 export type CreateAttendanceInput = z.infer<typeof createRecordSchema>;
 export type UpdateAttendanceInput = z.infer<typeof updateRecordSchema>;
 export type GetRecordsQueryInput = z.infer<typeof getRecordsQuerySchema>;
+export type GetSessionQueryInput = z.infer<typeof getSessionQuerySchema>;
+export type SaveSessionInput = z.infer<typeof saveSessionSchema>;
+

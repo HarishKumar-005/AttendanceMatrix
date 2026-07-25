@@ -94,7 +94,7 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
         style={{
           width: '100%',
           maxWidth: '540px',
-          padding: '2rem',
+          padding: '1.5rem',
           position: 'relative',
           backgroundColor: 'var(--bg-card-solid)',
           boxShadow: '0 20px 50px rgba(0,0,0,0.6)'
@@ -102,16 +102,11 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
           <div>
             <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-              {isEditing ? `Edit Attendance Record (${record?.record_code})` : 'Record New Attendance'}
+              {isEditing ? 'Edit Record' : 'New Attendance'}
             </h2>
-            <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
-              {isEditing
-                ? 'Updating record will trigger backend 30-day risk recalculation'
-                : 'Enter daily attendance entry for early-warning tracking'}
-            </p>
           </div>
           <button
             className="btn btn-secondary"
@@ -143,16 +138,16 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {/* Student Name */}
           <div>
-            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.375rem' }}>
-              STUDENT NAME *
+            <label style={{ display: 'block', fontSize: '0.6875rem', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
+              Student name
             </label>
             <input
               type="text"
               className="input-control"
-              placeholder="e.g. Rahul Kumar"
+              placeholder="Enter student name"
               value={studentName}
               onChange={(e) => setStudentName(e.target.value)}
             />
@@ -164,10 +159,10 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
           </div>
 
           {/* Student Code & Class Section */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div className="form-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.375rem' }}>
-                STUDENT CODE *
+              <label style={{ display: 'block', fontSize: '0.6875rem', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
+                Student code
               </label>
               <input
                 type="text"
@@ -184,8 +179,8 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.375rem' }}>
-                CLASS SECTION *
+              <label style={{ display: 'block', fontSize: '0.6875rem', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
+                Class
               </label>
               <select
                 className="input-control"
@@ -203,10 +198,10 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
           </div>
 
           {/* Date & Status */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div className="form-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.375rem' }}>
-                ATTENDANCE DATE *
+              <label style={{ display: 'block', fontSize: '0.6875rem', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
+                Date
               </label>
               <input
                 type="date"
@@ -222,8 +217,8 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.375rem' }}>
-                STATUS *
+              <label style={{ display: 'block', fontSize: '0.6875rem', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
+                Status
               </label>
               <select
                 className="input-control"
@@ -239,20 +234,20 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
 
           {/* Remarks */}
           <div>
-            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '0.375rem' }}>
-              REMARKS / REASON (OPTIONAL)
+            <label style={{ display: 'block', fontSize: '0.6875rem', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
+              Remarks (optional)
             </label>
             <textarea
               className="input-control"
-              rows={3}
-              placeholder="e.g. Medical leave slip provided, or unexcused absence..."
+              rows={2}
+              placeholder="Add any notes..."
               value={remarks}
               onChange={(e) => setRemarks(e.target.value)}
             />
           </div>
 
           {/* Footer Actions */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.25rem' }}>
             <button
               type="button"
               className="btn btn-secondary"

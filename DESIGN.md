@@ -1,482 +1,715 @@
-# AttendanceMatrix UI Design Direction
+# AttendanceMatrix Design Specification
 
-## 1. Design Goal
+## 1. Purpose
 
-AttendanceMatrix is a school attendance and dropout early-warning tool for teachers and headmasters. The interface must feel calm, fast, and trustworthy. It should let a user understand the current attendance situation, search a student, record attendance, and spot at-risk students without reading a wall of text.
+AttendanceMatrix is a school attendance and dropout early-warning system for the SIH internal assessment.
 
-The current interface already shows strong visual polish, but it is trying to do too many things on one screen. The result is a dense dashboard feel with repeated labels, multiple explanation lines, and several competing focal points. For this project, the better direction is **focused operational clarity** rather than a large information dashboard.
+The design goal is to support a **teacher-first, class-first attendance workflow** that is clean, fast, readable, and realistic for daily school use.
 
----
-
-## 2. What the Current UI Does Well
-
-The current UI has several strengths:
-- It uses a modern dark theme.
-- It looks professional and polished.
-- The cards, table, and modal are visually consistent.
-- The warning badges and state colors are easy to notice.
-- The add-attendance modal is compact and easy to scan.
-- The table layout is clean enough for records and editing.
-
-These are good foundations. The problem is not visual quality; the problem is **information density and hierarchy**.
+The interface should feel like a focused internal school operations tool, not a crowded dashboard.
 
 ---
 
-## 3. Main Problems in the Current UI
+## 2. Design Objectives
 
-### 3.1 Too much information on one screen
-The dashboard currently mixes:
-- project branding
-- architecture labels
-- KPI cards
-- filter controls
-- data table
-- warning summaries
-- explanatory text
+The UI should:
 
-This creates a crowded first impression. The user must process too many messages before doing the core task.
-
-### 3.2 Repeated wording and unnecessary labels
-Some screens repeat the same idea in multiple places:
-- project name
-- early-warning engine wording
-- architecture wording
-- descriptive subtitles
-- badge captions
-- helper text under cards
-
-This increases reading burden without improving task completion.
-
-### 3.3 The dashboard competes with the task
-The core job is attendance recording and student risk scanning. The current layout gives equal visual weight to branding, metrics, filters, and table content. That weakens the scanning experience.
-
-### 3.4 The add/edit modal is good but still verbose
-The modal is well structured, but it contains several helper texts and labels that could be shortened. For a teacher-facing workflow, the form should be faster to complete with fewer words.
-
-### 3.5 The page feels like a single long workspace
-A single tall page is not the issue by itself. The issue is that every section tries to do too much at once. The interface should have a clearer separation between:
-- overview
-- action
-- record list
-- record editing
+* make class-wise attendance marking the primary workflow
+* reduce visual clutter and unnecessary wording
+* separate attendance-taking from record browsing
+* let teachers inspect one student without losing the class view
+* keep risk flags visible but not noisy
+* work well on desktop, laptop, tablet, and mobile
+* remain easy to understand during a demo
+* preserve all existing functionality
+* feel calm, professional, and production-ready
 
 ---
 
-## 4. Best UI Direction for AttendanceMatrix
+## 3. Product Experience Philosophy
 
-The best design for this project is a **teacher command-center layout** with strong hierarchy and progressive disclosure.
+### 3.1 Teacher-first
 
-### Recommended structure
-1. **Compact top header**
-2. **One concise summary strip**
-3. **Primary action bar**
-4. **Search + filter controls**
-5. **Main attendance list**
-6. **Slide-over drawer or modal for add/edit**
-7. **Optional right-side detail panel for selected student**
-8. **Small, unobtrusive footer**
+A teacher should be able to answer these questions quickly:
 
-This keeps the page task-oriented instead of dashboard-heavy.
+* Which class am I marking now?
+* Which students are present or absent?
+* Who is at risk?
+* What changed recently?
+* Can I inspect one student without leaving the current class?
 
----
+### 3.2 Class-first
 
-## 5. Recommended Design Philosophy
+The class section should be the center of the product.
 
-### 5.1 Prioritize the main task
-The most important task is not reading the product description; it is:
-- finding a student,
-- marking attendance,
-- checking a risk flag,
-- and updating records quickly.
+The app should naturally support this sequence:
 
-The UI must visually favor those tasks.
+1. choose class
+2. choose date/session
+3. view the class roster
+4. mark attendance
+5. save the class session
+6. inspect student details if needed
 
-### 5.2 Use progressive disclosure
-Do not show every possible explanation at once. Show:
-- the minimum necessary summary first,
-- then reveal details only when the user asks for them.
+### 3.3 Progressive disclosure
 
-This avoids the attention-switching problem described by Nielsen Norman Group for “zen mode” style interfaces, where hiding context can increase cognitive load and interaction cost. For this project, the better approach is not full hiding, but **selective reduction**: keep the interface visible, but reduce noise. citeturn144836search1
+Show only the most important information first.
+Put deeper detail into:
 
-### 5.3 Use consistent list-entry hierarchy
-Each attendance row should present the same information in the same order so the user can compare entries quickly. Nielsen Norman Group notes that list entries should preserve content priority and remain consistent across rows to support scanning and comparison. citeturn144836search2
+* a drawer
+* a modal
+* a detail panel
+* an audit/history view
 
-### 5.4 Design for fast data entry
-For forms, the interface should ask only for the information that is truly needed and should clearly label each field. Apple’s Human Interface Guidelines recommend minimizing the amount of data users must enter and clearly indicating what is required. citeturn430093search1turn430093search2
+### 3.4 Low noise, high clarity
 
-### 5.5 Keep accessibility visible
-The layout should remain intuitive, perceivable, and adaptable, with clear labels, readable contrast, and familiar interactions. Apple’s accessibility guidance emphasizes interfaces that are intuitive, perceivable, and adaptable. citeturn430093search4
+The page should be visually calm.
+Use hierarchy and spacing instead of extra wording.
+Every block must justify its presence.
 
----
+### 3.5 Information density with restraint
 
-## 6. Recommended Information Architecture
-
-## Screen 1: Attendance Dashboard
-This is the main working screen.
-
-### Contains
-- compact title and subtitle
-- one short summary row
-- one primary action button
-- search and filters
-- attendance table
-- quick access to edit and view details
-
-### Purpose
-This is where teachers spend most of their time.
-
-### Do not overload this screen with
-- long explanations
-- architecture labels
-- multiple redundant badges
-- extra commentary text
+Attendance data is naturally dense, so the interface should remain compact.
+But density must not become clutter.
 
 ---
 
-## Screen 2: Add / Edit Attendance Drawer
-Use a right-side drawer on desktop and a full-screen modal or bottom sheet on mobile.
+## 4. Core UX Model
 
-### Contains
-- student name
-- student code
-- class section
-- date
-- status
-- remarks
-- save / cancel actions
+AttendanceMatrix should be structured around three main experiences:
 
-### Purpose
-This keeps entry focused and avoids leaving the main dashboard context.
+1. **Take Attendance**
+2. **Review Records**
+3. **Inspect Student Details**
+
+These experiences should feel related but not compressed into one overloaded panel.
 
 ---
 
-## Screen 3: Student Detail Side Panel
-Optional but useful for selected rows.
+## 5. Recommended Layout Strategy
 
-### Contains
-- student identity
-- latest status
-- last 30-day summary
-- warning flag
-- recent records
+## 5.1 Primary View: Class Attendance Workspace
 
-### Purpose
-This gives extra detail without making the default page heavy.
+This should be the default landing experience.
+
+The teacher should be able to:
+
+* select a class
+* select a date
+* see the roster for that class
+* mark attendance for each student
+* save the entire class session
+
+This is the most realistic daily-school workflow.
+
+## 5.2 Secondary View: Records and Audit
+
+This view should support:
+
+* search across attendance records
+* filter by class, status, date, and at-risk state
+* edit old entries
+* review attendance history
+
+This is important, but it should not dominate the primary workflow.
+
+## 5.3 Student Detail Drawer
+
+When a student row is clicked, open a side drawer or bottom sheet.
+
+The drawer should show:
+
+* student name
+* student code / ID
+* class section
+* recent attendance summary
+* 30-day absence count
+* at-risk state
+* remarks or notes
+* edit action
+
+The main class roster should stay visible behind it on desktop.
 
 ---
 
-## Screen 4: Empty / Error / Loading States
-These should be elegant and calm.
+## 6. Visual Style
+
+### 6.1 Overall feel
+
+Use a modern dark SaaS style with a school-operations identity.
+
+The design should feel:
+
+* professional
+* structured
+* readable
+* calm
+* confident
+* practical
+
+### 6.2 Avoid
+
+* oversized dashboard cards
+* repeated explanatory text
+* decorative gradients everywhere
+* too many icons
+* visual noise
+* crowded vertical stacks
+* unnecessary labels that repeat the same idea
+
+### 6.3 Keep
+
+* strong contrast
+* clean table rows
+* compact controls
+* meaningful risk colors
+* crisp typography
+* good spacing rhythm
+
+---
+
+## 7. Information Architecture
+
+The interface should be organized into these zones:
+
+1. App header
+2. Class/session control area
+3. Compact summary strip
+4. Search and filter bar
+5. Main roster workspace
+6. Student detail drawer
+7. Attendance add/edit modal
+8. Records/audit view
+9. Footer
+
+These zones should be visually distinct enough to reduce scanning effort.
+
+---
+
+## 8. Page Structure
+
+### 8.1 App Header
+
+The header should be compact and useful.
+
+Include only:
+
+* AttendanceMatrix title
+* short subtitle
+* selected class context if available
+* one primary action button
+
+The header should not dominate the page.
+
+### 8.2 Class / Session Control Area
+
+This is one of the most important parts of the interface.
+
+The teacher should be able to:
+
+* pick a class section quickly
+* choose the attendance date
+* switch between classes without confusion
+* understand which class is currently active
+
+This area should make the product feel class-first.
+
+### 8.3 Compact Summary Strip
+
+The summary cards should remain, but they must be small and secondary.
+
+Useful metrics may include:
+
+* total records
+* attendance rate
+* at-risk students
+* threshold
+
+The cards must not overpower the main workspace.
+
+### 8.4 Search and Filter Bar
+
+Keep all search and filters together in one compact, easy-to-scan bar.
+
+Suggested controls:
+
+* search by student / record / code
+* class section
+* attendance status
+* date range
+* at-risk toggle
+* clear filters
+
+The toolbar should be clean and easy to reset.
+
+### 8.5 Main Attendance Workspace
+
+This is the primary visual focus.
+
+For class attendance marking, the roster should show:
+
+* student name
+* student code / ID
+* class section
+* present / absent / excused status
+* risk indicator
+* remarks indicator if needed
+* action controls
+
+The table or roster must remain compact but readable.
+
+### 8.6 Student Detail Drawer
+
+The drawer should provide student-specific context without crowding the roster.
+
+It should show:
+
+* student profile
+* recent attendance history
+* absence count in the rolling 30-day window
+* warning state and reason
+* edit record entry points
+
+On mobile, it may become a bottom sheet or full-screen panel.
+
+### 8.7 Add/Edit Modal
+
+Keep the record form focused and lightweight.
+
+The form should be grouped logically and should not repeat information already visible elsewhere.
+
+### 8.8 Records / Audit View
+
+This view should preserve the existing searchable history behavior.
+
+It is useful for:
+
+* headmaster review
+* searching old records
+* editing historical entries
+* filtering by status and at-risk state
+
+### 8.9 Footer
+
+The footer should be small and unobtrusive.
+
+It should not compete with the core workflow.
+
+---
+
+## 9. Recommended Navigation Pattern
+
+### Option A: Single workspace with tabs
+
+* Attendance
+* Records
+* At-Risk Students
+* Settings
+
+This is a clean and practical choice.
+
+### Option B: Attendance-first with secondary audit page
+
+* default screen = attendance workspace
+* audit and history = secondary view
+
+This is the most suitable option for the project.
+
+### Recommended choice
+
+Use **Attendance-first with a secondary records/audit view**.
+
+That matches the real teacher workflow more naturally.
+
+---
+
+## 10. Layout Behavior by Device
+
+### 10.1 Desktop
+
+Use a spacious but structured layout.
+
+The page should support:
+
+* header
+* summary strip
+* toolbar
+* roster table
+* detail drawer
+
+### 10.2 Laptop
+
+Keep the same structure with slightly reduced spacing.
+
+### 10.3 Tablet
+
+Allow the toolbar and summary strip to wrap gracefully.
+
+### 10.4 Mobile
+
+Use a stacked layout.
+
+Recommended mobile priorities:
+
+* class selector
+* date selector
+* roster
+* student detail drawer or bottom sheet
+* add/edit modal
+
+No critical action should disappear on mobile.
+
+---
+
+## 11. Typography
+
+### 11.1 Hierarchy
+
+Use typography to separate:
+
+* page title
+* section title
+* label
+* table value
+* metadata
+
+### 11.2 Rules
+
+* use readable body text
+* keep titles short and confident
+* avoid oversized headings
+* keep labels consistent
+* use tabular numbers where useful
+
+### 11.3 Copy style
+
+Keep UI text short and practical.
+
+Prefer:
+
+* Attendance
+* Class
+* Date
+* Status
+* At-Risk
+* Search
+* Save
+* Edit
+
+Avoid long instructional sentences in the main interface.
+
+---
+
+## 12. Color Strategy
+
+Use color as a meaning system, not decoration.
+
+### Semantic colors
+
+* green: present / success
+* red: absent / at-risk / danger
+* amber: excused / warning / threshold
+* indigo or blue: primary actions and identity
+* gray: secondary metadata
+
+### Avoid
+
+* color overload
+* excessive glow effects
+* bright decorative gradients
+* heavy saturation
+
+The dark theme should stay calm and readable.
+
+---
+
+## 13. Table and Roster Design
+
+The roster table is the most important working surface.
+
+### Table should:
+
+* be compact
+* align columns cleanly
+* highlight attendance state clearly
+* show risk without extra clutter
+* keep actions obvious but not loud
+* support hover and focus states
+* remain stable when data changes
+
+### Table should not:
+
+* waste space with repeated labels
+* overload rows with too many icons
+* bury student identity
+* mix record and student meaning too much
+
+### Best roster behavior
+
+For class attendance, each row should support fast status marking.
+
+That can be done through:
+
+* radio-like present / absent / excused controls
+* quick toggles
+* row-level status chips
+* optional note indicator
+
+---
+
+## 14. Student Identity Presentation
+
+Each student should appear in a layered but compact way:
+
+* student name first
+* student code / ID second
+* class section nearby
+
+This helps the app handle duplicate names correctly.
+
+The visual design must make it clear that student ID is the true identity key.
+
+---
+
+## 15. Student Detail Drawer Rules
+
+The detail drawer should be the preferred place for deeper student information.
+
+It should show:
+
+* profile summary
+* attendance history
+* risk reason
+* recent absences
+* edit action
+
+The drawer should not force the user away from the main roster unless necessary.
+
+---
+
+## 16. Add/Edit Form Rules
+
+The form should:
+
+* feel simple
+* use grouped fields
+* minimize eye movement
+* keep the save action clear
+* preserve validation behavior
+* avoid extra explanatory text
+
+The form should be fast enough to use during attendance marking.
+
+---
+
+## 17. State Design
+
+Every data view must explicitly support four states:
+
+1. Loading
+2. Empty
+3. Error
+4. Success
 
 ### Loading
-- one short message
-- skeleton rows or muted shimmer
-- no giant loading banner
+
+Use a minimal loading state, preferably with skeletons or a calm spinner.
 
 ### Empty
-- one clear sentence
-- one CTA like “Record attendance”
-- no long explanation
+
+Show a contextual empty message.
 
 ### Error
-- one short, specific message
-- one retry action
-- no generic “something went wrong” block
+
+Show a clear, actionable message with retry if possible.
+
+### Success
+
+Show the loaded roster or records clearly.
 
 ---
 
-## 7. Final Layout Recommendation
+## 18. Error and Empty State Guidance
 
-### 7.1 Header
-Use a compact header with:
-- AttendanceMatrix logo or mark
-- one-line product title
-- one short subtitle
-- one primary action button
+### Empty state examples
 
-### Better subtitle
-Use a short line such as:
+* No attendance records yet.
+* No students found in this class.
+* No matches for the current filters.
 
-> School attendance tracking and 30-day early-warning register
+### Error state examples
 
-This is enough. Do not add a second sentence explaining the architecture in the main hero.
+* Could not load attendance records.
+* Save failed. Please check the form and try again.
+* Record not found.
 
-### 7.2 Summary strip
-Use 3 to 4 compact cards only:
-- total records
-- at-risk students
-- attendance rate
-- threshold value
-
-Avoid more than four summary tiles on the main page. Additional metrics should live in drill-down panels, not on the main dashboard.
-
-### 7.3 Filter zone
-Place filters in one compact horizontal band.
-
-Recommended controls:
-- search input
-- class dropdown
-- status dropdown
-- date range
-- risk-only toggle
-
-Keep the labels short.
-
-### 7.4 Main list
-The table should be the focal point.
-
-The row order should be:
-1. record code
-2. student identity
-3. class
-4. date
-5. status
-6. risk
-7. action
-
-This matches how users scan a register.
-
-### 7.5 Form
-The form should be grouped into two sections:
-- identity and attendance
-- optional notes
-
-Keep required fields obvious. Use short placeholders. Avoid explanatory paragraphs inside the form unless necessary.
+The UI should never look broken or silent.
 
 ---
 
-## 8. Best Visual Style for This Project
+## 19. Motion and Feedback
 
-### 8.1 Tone
-The style should feel:
-- calm
-- modern
-- institutional
-- credible
-- easy to scan
+Use motion sparingly.
 
-This is a school system, not a gaming dashboard and not a dense enterprise admin console.
+Recommended feedback:
 
-### 8.2 Color
-Recommended palette:
-- dark neutral background
-- one primary accent color
-- one warning color
-- one success color
-- one danger color
+* subtle hover transitions
+* smooth drawer open/close
+* minimal modal animation
+* calm loading indicators
+* clear save success feedback
 
-Use colors sparingly and semantically.
-
-### 8.3 Typography
-Use:
-- a strong title font
-- readable body text
-- muted labels
-- compact metadata
-
-The most important content should be larger and bolder than supporting metadata.
-
-### 8.4 Spacing
-Use more whitespace between sections and less text inside sections.
-
-This will make the app feel much more premium and easier to read.
-
-### 8.5 Cards
-Cards should not compete with the table. They should support it.
-
-### 8.6 Table rows
-Each row should have:
-- one dominant name line
-- one smaller secondary identifier
-- a single status badge
-- a single risk badge
-- one action
-
-Do not add more text blocks inside each row unless they are truly useful.
+Avoid flashy animation.
 
 ---
 
-## 9. Best Design Compared to Current Options
+## 20. Accessibility Rules
 
-### Option A: Current dense dashboard
-**Pros**
-- looks polished
-- shows lots of information
-- feels “feature rich”
+The design must support:
 
-**Cons**
-- too much text
-- crowded first screen
-- weak task focus
-- harder to scan quickly
-- user must read too much before acting
+* keyboard navigation
+* visible focus states
+* readable labels
+* good contrast
+* meaningful hit targets
+* semantic structure where appropriate
 
-**Verdict**
-Good as a prototype, not best for final SIH demo.
+Accessibility should improve usability, not complicate the flow.
 
 ---
 
-### Option B: Minimal single-page layout
-**Pros**
-- clean
-- fast to understand
-- low cognitive load
-- easier mobile layout
+## 21. Interaction Rules
 
-**Cons**
-- can become too sparse
-- may hide useful context
-- may feel too plain if not designed carefully
+### Primary action priority
 
-**Verdict**
-Better than the current version if overdone, but it may feel too empty for a demo.
+The user should always know what to do next.
 
----
+For the attendance workspace, the priority is:
 
-### Option C: Split command-center layout
-**Pros**
-- keeps context visible
-- supports fast scanning
-- allows controlled use of metrics
-- balances clarity and professionalism
-- works well for dashboard + table + modal workflows
+1. select class
+2. select date
+3. mark attendance
+4. save
+5. inspect a student if needed
 
-**Cons**
-- needs careful spacing
-- needs disciplined text reduction
+### Secondary actions
 
-**Verdict**
-This is the best choice for AttendanceMatrix.
+* search records
+* filter records
+* open detail drawer
+* edit historical entry
+* review at-risk students
 
 ---
 
-## 10. What to Remove or Reduce
+## 22. Recommended Product Split
 
-The current interface should reduce:
-- repeated architecture badges in the hero
-- long subtitle text
-- too many explanatory lines under cards
-- multiple similar helper sentences
-- overdesigned labels that restate the obvious
+The app should feel split into two main working modes:
 
-The UI should not keep explaining itself. It should let the user work.
+### Mode 1: Attendance Taking
 
----
+* class-first
+* roster-based
+* session-oriented
+* fastest path for the teacher
 
-## 11. What to Keep
+### Mode 2: Records and Audit
 
-Keep these elements:
-- compact modern branding
-- risk badges
-- edit action
-- clean card styling
-- dark theme
-- responsive form modal
-- clear table hierarchy
+* searchable
+* filterable
+* historical
+* review-oriented
 
-These are already aligned with the product goal.
+This split makes the interface much easier to understand.
 
 ---
 
-## 12. Recommended Interaction Model
+## 23. What to Keep from the Existing UI
 
-### Primary flow
-1. open dashboard
-2. scan summary
-3. search or filter
-4. inspect table
-5. open add/edit drawer
-6. save
-7. return to table and see updated result
+Preserve the useful parts:
 
-### Secondary flow
-1. click a row
-2. open student details panel
-3. review recent attendance
-4. decide if follow-up is needed
-
-This flow is fast and easy to explain in a viva.
+* dark theme
+* status pills
+* at-risk visibility
+* compact summary metrics
+* strong primary action styling
+* modal editing behavior
+* search and filter logic
+* 4-state data handling
 
 ---
 
-## 13. Mobile Design Recommendation
+## 24. What to Improve
 
-On mobile:
-- collapse summary cards into a horizontal swipe row or stacked blocks
-- convert the table into card rows if needed
-- keep one primary action visible
-- make filters open in a sheet
-- make the add/edit form full screen
+Improve:
 
-Mobile should feel like a compact workbench, not a shrunk desktop page.
-
----
-
-## 14. Accessibility Rules
-
-- every form field must have a visible label
-- placeholder text must not replace labels
-- status colors must also have text
-- buttons must have clear names
-- focus states must be visible
-- row actions must be keyboard accessible
-- contrast must stay readable in dark mode
-
-This matters because the app is meant for real operational use, not just visual appeal. Apple’s accessibility guidance emphasizes intuitive, perceivable, and adaptable interfaces. citeturn430093search4
+* visual hierarchy
+* class-centric workflow
+* spacing and alignment
+* wording length
+* record-to-student clarity
+* detail separation
+* mobile behavior
+* drawer/modal interactions
+* page readability
 
 ---
 
-## 15. Best Copy Style for the UI
+## 25. What to Remove or Reduce
 
-### Use short labels
-Good:
-- Attendance Rate
-- At-Risk Students
-- Class Section
-- Status
+Reduce or remove:
 
-Avoid:
-- 30-Day Rolling Average Attendance Rate
-- Recalculate Early-Warning Defaulter Engine State
-- School Digital Register with Multi-Layer Architectural Enforcement
-
-### Use short helper text
-Good:
-- Track daily attendance
-- Filter by class or status
-- Save changes instantly
-
-Avoid long descriptive paragraphs in the main screen.
+* repeated subtitles
+* excessive dashboard noise
+* oversized cards
+* too many icons
+* long helper copy
+* crowded stacked sections
+* unnecessary decorative borders
 
 ---
 
-## 16. Recommended Refactor Outcome
+## 26. Acceptance Criteria
 
-After refactor, the interface should feel like:
+The design is successful if:
 
-- one clear working dashboard
-- one main table
-- one action area
-- one compact summary area
-- one focused modal or drawer for entry
-
-The user should instantly understand:
-- where to look,
-- what matters,
-- how to add data,
-- and how to inspect risk.
+* the page feels less crowded
+* class-based attendance is clearly the main workflow
+* student details are separated cleanly
+* the roster is easy to scan
+* records/audit remain available
+* the UI works well on desktop and mobile
+* no essential functionality is lost
+* the product feels professional and realistic
+* the design supports a real teacher workflow
 
 ---
 
-## 17. Final Decision
+## 27. Implementation Guidance
 
-For AttendanceMatrix, the best UI is **not** the current information-heavy dashboard and **not** an ultra-minimal hidden-controls interface. The best UI is a **structured command-center layout** with:
-- strong hierarchy
-- fewer words
-- visible but restrained context
-- consistent list entries
-- compact forms
-- explicit states
-- high scanability
+When implementing this design:
 
-That gives the project the best balance of clarity, professionalism, and SIH-ready usability.
+* keep the backend untouched unless a small supportive addition is needed
+* refactor the frontend layout first
+* preserve search, filters, add/edit, and at-risk logic
+* introduce a student detail drawer if it improves the workflow
+* keep the records view as a secondary path
+* verify after each major UI change
+
+---
+
+## 28. Final Design Summary
+
+AttendanceMatrix should become a class-first attendance workspace with a focused roster, a clean summary strip, a separate student detail view, and a secondary records/audit mode.
+
+The design should feel like a practical school operations system that teachers can use every day.
+
+The final experience should be:
+
+* clearer
+* calmer
+* more structured
+* more readable
+* more realistic
+* more professional
+* easier to maintain

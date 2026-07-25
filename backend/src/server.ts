@@ -4,6 +4,7 @@ import { env } from './config/env.js';
 import healthRoutes from './routes/health.routes.js';
 import recordsRoutes from './routes/records.routes.js';
 import studentsRoutes from './routes/students.routes.js';
+import attendanceRoutes from './routes/attendance.routes.js';
 import { errorHandler, AppError } from './middleware/error-handler.js';
 
 const app = express();
@@ -14,8 +15,10 @@ app.use(express.json());
 
 // API Routes
 app.use('/api/health', healthRoutes);
+app.use('/api/attendance', attendanceRoutes);
 app.use('/api/records', recordsRoutes);
 app.use('/api/students', studentsRoutes);
+
 
 // Catch-all 404 Not Found handler
 app.use((req: Request, _res: Response, next: NextFunction) => {

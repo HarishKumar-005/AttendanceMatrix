@@ -5,6 +5,46 @@
  */
 
 export type AttendanceStatus = 'present' | 'absent' | 'excused';
+export type SessionLifecycle = 'clean' | 'draft' | 'saving' | 'saved' | 'failed';
+
+export interface StudentRosterEntry {
+  student_id: string;
+  student_code: string;
+  student_name: string;
+  class_section: string;
+  status: AttendanceStatus;
+  is_defaulter: boolean;
+  record_id?: string | null;
+  remarks?: string | null;
+}
+
+export interface AttendanceSession {
+  class_section: string;
+  attendance_date: string;
+  status: SessionLifecycle;
+  total_enrolled: number;
+  present_count: number;
+  absent_count: number;
+  excused_count: number;
+  roster: StudentRosterEntry[];
+}
+
+export interface SaveSessionPayload {
+  class_section: string;
+  date: string;
+  records: Array<{
+    student_id: string;
+    student_code: string;
+    student_name: string;
+    status: AttendanceStatus;
+    remarks?: string | null;
+  }>;
+}
+
+export interface SaveSessionResponse {
+  session: AttendanceSession;
+  updated_defaulters: StudentSummary[];
+}
 
 export interface AttendanceRecord {
   id: string;
@@ -127,7 +167,33 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 }
 
 /**
- * Fetch list of attendance records with optional filtering & calculated overview metrics.
+ * Fetch an active Attendance Session for a class section and date.
+ */
+export async function fetchAttendanceSession(
+  classSection: string,
+  date: string
+): Promise<AttendanceSession> {
+  const query = new URLSearchParams({
+    class_section: classSection,
+    date,
+  });
+  return request<AttendanceSession>(`/attendance/session?${query.toString()}`);
+}
+
+/**
+ * Save an entire class Attendance Session atomically.
+ */
+export async function saveAttendanceSession(
+  payload: SaveSessionPayload
+): Promise<SaveSessionResponse> {
+  return request<SaveSessionResponse>('/attendance/session/save', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+/**
+ * Fetch list of historical attendance records with optional filtering & calculated overview metrics.
  */
 export async function fetchRecords(filters?: FilterParams): Promise<{
   records: AttendanceRecord[];
@@ -142,7 +208,7 @@ export async function fetchRecords(filters?: FilterParams): Promise<{
   if (filters?.isDefaulter !== undefined && filters.isDefaulter) query.append('isDefaulter', 'true');
 
   const queryString = query.toString();
-  const endpoint = `/records${queryString ? `?${queryString}` : ''}`;
+  const endpoint = `/attendance/history${queryString ? `?${queryString}` : ''}`;
   
   return request<{ records: AttendanceRecord[]; metrics: SummaryMetrics }>(endpoint, {
     method: 'GET',
@@ -150,26 +216,26 @@ export async function fetchRecords(filters?: FilterParams): Promise<{
 }
 
 /**
- * Create a new attendance record. Trigger server-side recalculation.
+ * Create a single historical attendance record. Trigger server-side recalculation.
  */
 export async function createRecord(payload: CreateRecordPayload): Promise<{
   record: AttendanceRecord;
   summary?: StudentSummary;
 }> {
-  return request<{ record: AttendanceRecord; summary?: StudentSummary }>('/records', {
+  return request<{ record: AttendanceRecord; summary?: StudentSummary }>('/attendance/history', {
     method: 'POST',
     body: JSON.stringify(payload),
   });
 }
 
 /**
- * Update an existing attendance record by ID. Trigger server-side recalculation.
+ * Update an existing historical attendance record by ID. Trigger server-side recalculation.
  */
 export async function updateRecord(id: string, payload: UpdateRecordPayload): Promise<{
   record: AttendanceRecord;
   summary?: StudentSummary;
 }> {
-  return request<{ record: AttendanceRecord; summary?: StudentSummary }>(`/records/${id}`, {
+  return request<{ record: AttendanceRecord; summary?: StudentSummary }>(`/attendance/history/${id}`, {
     method: 'PUT',
     body: JSON.stringify(payload),
   });

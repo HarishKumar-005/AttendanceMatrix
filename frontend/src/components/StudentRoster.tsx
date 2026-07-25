@@ -20,7 +20,7 @@ export const StudentRoster: React.FC<StudentRosterProps> = ({
 }) => {
   return (
     <div className="glass-panel" style={{ overflow: 'hidden' }}>
-      {/* Desktop & Tablet High-Density Table View (≥ 641px) */}
+      {/* Desktop & Tablet High-Density Table View (≥ 769px) */}
       <div className="roster-table-view" style={{ overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
           <thead>
@@ -141,7 +141,7 @@ export const StudentRoster: React.FC<StudentRosterProps> = ({
         </table>
       </div>
 
-      {/* Mobile Card List View (≤ 640px) */}
+      {/* Mobile Card List View (≤ 768px) */}
       <div className="roster-mobile-card-list">
         {roster.map((student, idx) => {
           const isSelected = student.student_id === selectedStudentId;
@@ -192,13 +192,13 @@ export const StudentRoster: React.FC<StudentRosterProps> = ({
               </div>
 
               {/* Status Segmented Buttons for Mobile */}
-              <div style={{ marginTop: '0.625rem' }} onClick={(e) => e.stopPropagation()}>
-                <div className="status-toggle-group" style={{ width: '100%', display: 'flex' }}>
+              <div style={{ marginTop: '0.625rem', width: '100%' }} onClick={(e) => e.stopPropagation()}>
+                <div className="status-toggle-group" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', width: '100%', gap: '2px', padding: '2px', boxSizing: 'border-box' }}>
                   <button
                     type="button"
                     className={`status-toggle-btn toggle-present ${student.status === 'present' ? 'active' : ''}`}
                     onClick={() => onStatusToggle(student.student_id, 'present')}
-                    style={{ flex: 1, minHeight: '40px' }}
+                    style={{ minHeight: '36px', padding: '0.25rem 0', fontSize: '0.65rem', fontWeight: 600, letterSpacing: '-0.02em', textAlign: 'center', width: '100%', boxSizing: 'border-box' }}
                   >
                     Present
                   </button>
@@ -207,7 +207,7 @@ export const StudentRoster: React.FC<StudentRosterProps> = ({
                     type="button"
                     className={`status-toggle-btn toggle-absent ${student.status === 'absent' ? 'active' : ''}`}
                     onClick={() => onStatusToggle(student.student_id, 'absent')}
-                    style={{ flex: 1, minHeight: '40px' }}
+                    style={{ minHeight: '36px', padding: '0.25rem 0', fontSize: '0.65rem', fontWeight: 600, letterSpacing: '-0.02em', textAlign: 'center', width: '100%', boxSizing: 'border-box' }}
                   >
                     Absent
                   </button>
@@ -216,7 +216,7 @@ export const StudentRoster: React.FC<StudentRosterProps> = ({
                     type="button"
                     className={`status-toggle-btn toggle-excused ${student.status === 'excused' ? 'active' : ''}`}
                     onClick={() => onStatusToggle(student.student_id, 'excused')}
-                    style={{ flex: 1, minHeight: '40px' }}
+                    style={{ minHeight: '36px', padding: '0.25rem 0', fontSize: '0.65rem', fontWeight: 600, letterSpacing: '-0.02em', textAlign: 'center', width: '100%', boxSizing: 'border-box' }}
                   >
                     Excused
                   </button>

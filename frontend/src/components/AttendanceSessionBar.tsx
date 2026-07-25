@@ -39,7 +39,7 @@ export const AttendanceSessionBar: React.FC<AttendanceSessionBarProps> = ({
       }}
     >
       {/* Enrolled & Status Breakdown */}
-      <div className="session-bar-roster" style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+      <div className="session-bar-roster" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
         <div>
           <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             Class Roster
@@ -57,7 +57,7 @@ export const AttendanceSessionBar: React.FC<AttendanceSessionBarProps> = ({
       </div>
 
       {/* Session State Badge & Quick Actions */}
-      <div className="session-bar-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+      <div className="session-bar-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
         {sessionState === 'draft' && (
           <span className="badge badge-warning" style={{ gap: '0.375rem' }}>
             <AlertTriangle style={{ width: '0.75rem', height: '0.75rem' }} />
@@ -76,10 +76,10 @@ export const AttendanceSessionBar: React.FC<AttendanceSessionBarProps> = ({
           type="button"
           className="btn btn-secondary mark-all-present-btn"
           onClick={onMarkAllPresent}
-          style={{ padding: '0.375rem 0.75rem', fontSize: '0.8125rem' }}
+          style={{ padding: '0.375rem 0.625rem', fontSize: '0.75rem' }}
           title="Set all student statuses in roster to Present"
         >
-          <UserCheck style={{ width: '0.875rem', height: '0.875rem', color: 'var(--present)' }} />
+          <UserCheck style={{ width: '0.875rem', height: '0.875rem', color: 'var(--present)', flexShrink: 0 }} />
           Mark All Present
         </button>
       </div>

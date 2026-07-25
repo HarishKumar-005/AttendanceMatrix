@@ -90,4 +90,19 @@ All notable changes to the AttendanceMatrix project are documented here in appen
 - Frontend Build: 191.07 KB (gzip: 56.96 KB)
 - Zero TypeScript errors, zero build warnings in both frontend & backend.
 
+## [2026-07-26] Mobile Responsiveness & Multi-Service Deployment Overhaul
 
+### Added
+- **Mobile Card View Architecture**:
+  - Added `.roster-mobile-card-list` in [`StudentRoster.tsx`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/frontend/src/components/StudentRoster.tsx) and `.history-mobile-card-list` in [`AttendanceTable.tsx`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/frontend/src/components/AttendanceTable.tsx), triggered seamlessly at `@media (max-width: 768px)`.
+  - Implemented 3-column equal grid `grid-template-columns: repeat(3, minmax(0, 1fr))` for touch-friendly P/A/E status buttons on mobile.
+- **Vercel Monorepo Multi-Service Deployment**:
+  - Updated [`vercel.json`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/vercel.json) declaring `frontend` (`root: "frontend"`, `framework: "vite"`, `outputDirectory: "dist"`) and `backend` (`root: "backend"`, `entrypoint: "src/server.ts"`).
+  - Fixed TypeScript compiler error `TS6307` in [`backend/tsconfig.json`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/backend/tsconfig.json).
+- **Comprehensive Viewport Verification**:
+  - Executed automated Playwright testing across 11 target viewports (`320px`, `360px`, `375px`, `390px`, `412px`, `430px`, `768px`, `1024px`, `1280px`, `1440px`, `1920px`).
+  - Verified zero horizontal scrolling, zero text truncation, 100% fluid card stacking, and full bottom-sheet drawer functionality on mobile.
+
+### Metrics
+- Frontend Build: 195.27 KB (gzip: 57.50 KB)
+- Verified across 11 viewports with zero layout errors.

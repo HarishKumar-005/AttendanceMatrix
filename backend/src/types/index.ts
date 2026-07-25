@@ -1,0 +1,295 @@
+export type AttendanceStatus = 'present' | 'absent' | 'excused';
+
+export interface Student {
+  id: string;
+  student_code: string;
+  full_name: string;
+  current_class_section: string;
+  roll_number: string | null;
+  guardian_name: string | null;
+  guardian_phone: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AttendanceRecord {
+  id: string;
+  record_code: string;
+  student_id: string;
+  student_name_snapshot: string;
+  class_section: string;
+  attendance_date: string;
+  status: AttendanceStatus;
+  reason: string | null;
+  marked_by: string | null;
+  source: 'manual' | 'seed' | 'import';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AttendancePolicy {
+  id: number;
+  absence_threshold: number;
+  warning_window_days: number;
+  minimum_attendance_percentage: number;
+  active: boolean;
+  updated_at: string;
+}
+
+export interface DefaulterLog {
+  id: string;
+  student_id: string;
+  student_name_snapshot: string;
+  class_section: string;
+  policy_id: number;
+  evaluation_date: string;
+  window_start: string;
+  window_end: string;
+  window_days: number;
+  absences_last_30_days: number;
+  total_considered_days: number;
+  attendance_percentage: number | null;
+  threshold_absences: number;
+  minimum_attendance_percentage: number | null;
+  is_defaulter: boolean;
+  warning_reason: string;
+  source_record_id: string | null;
+  evaluated_at: string;
+}
+
+export interface StudentSummary {
+  student_id: string;
+  student_name: string;
+  class_section: string;
+  evaluation_date: string;
+  window_start: string;
+  window_end: string;
+  window_days: number;
+  absences_last_30_days: number;
+  total_considered_days: number;
+  attendance_percentage: number;
+  absence_threshold: number;
+  is_defaulter: boolean;
+  warning_reason: string;
+  evaluated_at: string;
+}
+
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[];
+
+export type Database = {
+  public: {
+    Tables: {
+      students: {
+        Row: {
+          id: string;
+          student_code: string;
+          full_name: string;
+          current_class_section: string;
+          roll_number: string | null;
+          guardian_name: string | null;
+          guardian_phone: string | null;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          student_code: string;
+          full_name: string;
+          current_class_section: string;
+          roll_number?: string | null;
+          guardian_name?: string | null;
+          guardian_phone?: string | null;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          student_code?: string;
+          full_name?: string;
+          current_class_section?: string;
+          roll_number?: string | null;
+          guardian_name?: string | null;
+          guardian_phone?: string | null;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      attendance_records: {
+        Row: {
+          id: string;
+          record_code: string;
+          student_id: string;
+          student_name_snapshot: string;
+          class_section: string;
+          attendance_date: string;
+          status: AttendanceStatus;
+          reason: string | null;
+          marked_by: string | null;
+          source: 'manual' | 'seed' | 'import';
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          record_code: string;
+          student_id: string;
+          student_name_snapshot: string;
+          class_section: string;
+          attendance_date: string;
+          status: AttendanceStatus;
+          reason?: string | null;
+          marked_by?: string | null;
+          source?: 'manual' | 'seed' | 'import';
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          record_code?: string;
+          student_id?: string;
+          student_name_snapshot?: string;
+          class_section?: string;
+          attendance_date?: string;
+          status?: AttendanceStatus;
+          reason?: string | null;
+          marked_by?: string | null;
+          source?: 'manual' | 'seed' | 'import';
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      attendance_policy: {
+        Row: {
+          id: number;
+          absence_threshold: number;
+          warning_window_days: number;
+          minimum_attendance_percentage: number;
+          active: boolean;
+          updated_at: string;
+        };
+        Insert: {
+          id?: number;
+          absence_threshold?: number;
+          warning_window_days?: number;
+          minimum_attendance_percentage?: number;
+          active?: boolean;
+          updated_at?: string;
+        };
+        Update: {
+          id?: number;
+          absence_threshold?: number;
+          warning_window_days?: number;
+          minimum_attendance_percentage?: number;
+          active?: boolean;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      defaulter_logs: {
+        Row: {
+          id: string;
+          student_id: string;
+          student_name_snapshot: string;
+          class_section: string;
+          policy_id: number;
+          evaluation_date: string;
+          window_start: string;
+          window_end: string;
+          window_days: number;
+          absences_last_30_days: number;
+          total_considered_days: number;
+          attendance_percentage: number | null;
+          threshold_absences: number;
+          minimum_attendance_percentage: number | null;
+          is_defaulter: boolean;
+          warning_reason: string;
+          source_record_id: string | null;
+          evaluated_at: string;
+        };
+        Insert: {
+          id?: string;
+          student_id: string;
+          student_name_snapshot: string;
+          class_section: string;
+          policy_id: number;
+          evaluation_date: string;
+          window_start: string;
+          window_end: string;
+          window_days: number;
+          absences_last_30_days: number;
+          total_considered_days: number;
+          attendance_percentage?: number | null;
+          threshold_absences: number;
+          minimum_attendance_percentage?: number | null;
+          is_defaulter: boolean;
+          warning_reason: string;
+          source_record_id?: string | null;
+          evaluated_at?: string;
+        };
+        Update: {
+          id?: string;
+          student_id?: string;
+          student_name_snapshot?: string;
+          class_section?: string;
+          policy_id?: number;
+          evaluation_date?: string;
+          window_start?: string;
+          window_end?: string;
+          window_days?: number;
+          absences_last_30_days?: number;
+          total_considered_days?: number;
+          attendance_percentage?: number | null;
+          threshold_absences?: number;
+          minimum_attendance_percentage?: number | null;
+          is_defaulter?: boolean;
+          warning_reason?: string;
+          source_record_id?: string | null;
+          evaluated_at?: string;
+        };
+        Relationships: [];
+      };
+    };
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
+    Enums: {
+      attendance_status: AttendanceStatus;
+    };
+    CompositeTypes: Record<string, never>;
+  };
+};
+
+export interface ApiSuccessResponse<T> {
+  success: true;
+  data: T;
+  meta?: {
+    total?: number;
+    page?: number;
+    limit?: number;
+    [key: string]: unknown;
+  };
+}
+
+export interface ApiErrorDetail {
+  code: string;
+  message: string;
+  fields?: Record<string, string>;
+}
+
+export interface ApiErrorResponse {
+  success: false;
+  error: ApiErrorDetail;
+}
+
+export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;

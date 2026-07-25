@@ -1,0 +1,19 @@
+{
+  "name": "attendance-matrix",
+  "version": "1.0.0",
+  "description": "Government School Attendance Register and Dropout Early-Warning System",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "shared",
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "type-check": "npm run type-check --workspaces",
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "db:seed": "npm run db:seed --workspace=backend"
+  }
+}

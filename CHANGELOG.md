@@ -144,3 +144,37 @@ All notable changes to the AttendanceMatrix project are documented here in appen
 ### Metrics
 - Frontend Build: 220.77 KB (gzip: 62.19 KB)
 - Verified end-to-end in browser via Playwright: 14 initial alerts generated automatically, dropdown rendered cleanly over all backdrop layers, Student Drawer opened cleanly via "View Student" CTA, Early Warning Center statistics rendering 11 Critical and 3 Near-Threshold alerts matching DB state.
+
+## [2026-07-26] Toast Alert Popup Removal & Navigation Terminology Optimization
+
+### Changed
+- **Toast Popup Removal**:
+  - Removed `<NotificationToastContainer />` from [`App.tsx`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/frontend/src/App.tsx) and removed toast state management from [`useNotifications.ts`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/frontend/src/hooks/useNotifications.ts). Floating popup toasts stacked on screen edge are completely eliminated. Early warning alerts reside exclusively inside the Notification Bell dropdown and Early Warning Center tab.
+- **Navigation Header Terminology Optimization**:
+  - Updated [`AppHeader.tsx`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/frontend/src/components/AppHeader.tsx) and [`NotificationBell.tsx`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/frontend/src/components/NotificationBell.tsx):
+    - `Workspace` → `Daily Register`
+    - `History Log` → `Attendance History`
+    - `Early Warning` → `Early Warning Center`
+    - `Alerts` → `Risk Alerts`
+    - Header subtitle → `Smart school attendance & 30-day early-warning register`
+
+### Metrics
+- Frontend Build: 218.67 KB (gzip: 61.67 KB)
+- Zero TypeScript compiler errors, zero build warnings.
+- Verified in Playwright browser: zero popup toasts present, refined navigation bar labels active.
+
+## [2026-07-26] Mobile Navigation Bar Responsive Architecture Fix
+
+### Changed
+- **Responsive Label Switcher**:
+  - Updated [`AppHeader.tsx`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/frontend/src/components/AppHeader.tsx) and [`NotificationBell.tsx`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/frontend/src/components/NotificationBell.tsx) with `.tab-label-desktop` and `.tab-label-mobile` classes.
+  - Desktop (> 768px): Displays formal full titles (`Daily Register`, `Attendance History`, `Early Warning Center`, `Risk Alerts`).
+  - Mobile (≤ 768px): Displays crisp concise titles (`Register`, `History`, `Warnings`, `Alerts`).
+- **Mobile Header Actions Layout**:
+  - Updated [`index.css`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/frontend/src/index.css) `@media (max-width: 420px)` rule. Tabs span 100% width on Row 1 (`Register` | `History` | `Warnings`), while `.notif-bell-btn` (`Alerts 14`) spans 100% width on Row 2.
+  - Completely eliminates text clipping, button overlap, or horizontal scrolling on narrow phone screens (320px to 430px).
+
+### Metrics
+- Frontend Build: 219.27 KB (gzip: 61.75 KB)
+- Zero TypeScript compiler errors, zero build warnings.
+- Verified across 320px, 360px, 375px, 768px, 1280px viewports via Playwright browser testing.

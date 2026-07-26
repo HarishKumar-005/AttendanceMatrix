@@ -50,49 +50,55 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   onSelectStudent,
 }) => {
   return (
-    <header className="glass-panel" style={{ padding: '0.875rem 1.25rem', marginBottom: '1rem' }}>
+    <header className="glass-panel app-header" style={{ padding: '0.875rem 1.25rem', marginBottom: '1rem' }}>
       <div className="app-header-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
         {/* Brand & Subtitle */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', minWidth: 0, maxWidth: '100%' }}>
           <GraduationCap style={{ width: '1.25rem', height: '1.25rem', color: 'var(--primary)', flexShrink: 0 }} />
-          <div>
+          <div style={{ minWidth: 0 }}>
             <h1 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#ffffff', lineHeight: 1.2 }}>
               AttendanceMatrix
             </h1>
-            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.125rem' }}>
-              School attendance workspace &amp; 30-day early-warning register
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.125rem', overflowWrap: 'break-word', lineHeight: 1.3 }}>
+              Smart school attendance &amp; 30-day early-warning register
             </p>
           </div>
         </div>
 
-        {/* Mode Switcher Tabs, Notification Bell, & Quick Action */}
-        <div className="app-header-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        {/* Mode Switcher Tabs, Risk Alerts Bell, & Quick Action */}
+        <div className="app-header-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', maxWidth: '100%' }}>
           <div className="nav-tab-group">
             <button
               type="button"
               className={`nav-tab-btn ${activeTab === 'workspace' ? 'active' : ''}`}
               onClick={() => onTabChange('workspace')}
+              title="Daily Attendance Register"
             >
-              <CheckSquare style={{ width: '0.875rem', height: '0.875rem' }} />
-              Workspace
+              <CheckSquare style={{ width: '0.875rem', height: '0.875rem', flexShrink: 0 }} />
+              <span className="tab-label-desktop">Daily Register</span>
+              <span className="tab-label-mobile">Register</span>
             </button>
 
             <button
               type="button"
               className={`nav-tab-btn ${activeTab === 'history' ? 'active' : ''}`}
               onClick={() => onTabChange('history')}
+              title="Attendance Audit & Log History"
             >
-              <History style={{ width: '0.875rem', height: '0.875rem' }} />
-              History Log
+              <History style={{ width: '0.875rem', height: '0.875rem', flexShrink: 0 }} />
+              <span className="tab-label-desktop">Attendance History</span>
+              <span className="tab-label-mobile">History</span>
             </button>
 
             <button
               type="button"
               className={`nav-tab-btn ${activeTab === 'early-warning' ? 'active' : ''}`}
               onClick={() => onTabChange('early-warning')}
+              title="Dropout Early Warning Center & Defaulters"
             >
-              <ShieldAlert style={{ width: '0.875rem', height: '0.875rem', color: activeTab === 'early-warning' ? '#ffffff' : '#f43f5e' }} />
-              Early Warning
+              <ShieldAlert style={{ width: '0.875rem', height: '0.875rem', color: activeTab === 'early-warning' ? '#ffffff' : '#f43f5e', flexShrink: 0 }} />
+              <span className="tab-label-desktop">Early Warning Center</span>
+              <span className="tab-label-mobile">Warnings</span>
             </button>
           </div>
 

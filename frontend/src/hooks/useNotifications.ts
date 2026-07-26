@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   TeacherNotification,
   NotificationAnalytics,
@@ -24,10 +24,6 @@ export function useNotifications() {
   const [error, setError] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<'all' | 'unread'>('all');
-  const [toasts, setToasts] = useState<ToastItem[]>([]);
-
-  // Ref to track known notification IDs to trigger new toasts
-  const knownNotificationIds = useRef<Set<string>>(new Set());
 
   const loadNotifications = useCallback(async () => {
     try {
@@ -37,26 +33,6 @@ export function useNotifications() {
         fetchUnreadNotificationCount(),
         fetchNotificationAnalytics(),
       ]);
-
-      // Detect newly arrived notifications for live toast triggers
-      const newItems = list.filter((item) => !knownNotificationIds.current.has(item.id));
-      if (knownNotificationIds.current.size > 0 && newItems.length > 0) {
-        const newToasts: ToastItem[] = newItems
-          .filter((item) => !item.is_read)
-          .map((item) => ({
-            id: `toast-${item.id}-${Date.now()}`,
-            notification: item,
-          }));
-
-        if (newToasts.length > 0) {
-          setToasts((prev) => [...prev, ...newToasts]);
-        }
-      }
-
-      // Update known IDs ref
-      const newSet = new Set<string>();
-      list.forEach((item) => newSet.add(item.id));
-      knownNotificationIds.current = newSet;
 
       setNotifications(list);
       setUnreadCount(count);
@@ -128,10 +104,6 @@ export function useNotifications() {
     }
   };
 
-  const dismissToast = (toastId: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== toastId));
-  };
-
   const togglePanel = () => setIsOpen((prev) => !prev);
   const closePanel = () => setIsOpen(false);
 
@@ -143,7 +115,6 @@ export function useNotifications() {
     error,
     isOpen,
     activeTab,
-    toasts,
     setActiveTab,
     togglePanel,
     closePanel,
@@ -151,7 +122,6 @@ export function useNotifications() {
     markAllRead,
     dismiss,
     clearAll,
-    dismissToast,
     refresh: loadNotifications,
   };
 }

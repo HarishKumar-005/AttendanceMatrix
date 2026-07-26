@@ -7,7 +7,6 @@ import { AttendanceHistory } from './components/AttendanceHistory';
 import { EarlyWarningDashboard } from './components/EarlyWarningDashboard';
 import { StudentWorkspaceDrawer } from './components/StudentWorkspaceDrawer';
 import { AttendanceForm } from './components/AttendanceForm';
-import { NotificationToastContainer } from './components/NotificationToastContainer';
 
 export const App: React.FC = () => {
   const {
@@ -69,7 +68,6 @@ export const App: React.FC = () => {
     error: errorNotifs,
     isOpen: isNotifOpen,
     activeTab: notifActiveTab,
-    toasts,
     setActiveTab: setNotifActiveTab,
     togglePanel: toggleNotifPanel,
     closePanel: closeNotifPanel,
@@ -77,7 +75,6 @@ export const App: React.FC = () => {
     markAllRead: markAllNotifsRead,
     dismiss: dismissNotif,
     clearAll: clearAllNotifs,
-    dismissToast,
     refresh: refreshNotifs,
   } = useNotifications();
 
@@ -115,18 +112,11 @@ export const App: React.FC = () => {
         onSelectStudent={selectStudent}
       />
 
-      {/* Live Early Warning Toast Manager */}
-      <NotificationToastContainer
-        toasts={toasts}
-        onDismiss={dismissToast}
-        onSelectStudent={selectStudent}
-      />
-
       {/* Main Workspace Layout */}
       <main className="workspace-layout">
         <div className="workspace-main">
           {currentTab === 'workspace' && (
-            /* Primary Domain View: Attendance Workspace */
+            /* Primary Domain View: Daily Attendance Register */
             <AttendanceWorkspace
               activeClass={selectedClassSection}
               activeDate={selectedDate}
@@ -168,7 +158,7 @@ export const App: React.FC = () => {
           )}
 
           {currentTab === 'early-warning' && (
-            /* Early Warning Dashboard Center View */
+            /* Early Warning Center View */
             <EarlyWarningDashboard
               notifications={notifications}
               analytics={analytics}

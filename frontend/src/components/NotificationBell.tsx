@@ -366,8 +366,11 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({
           gap: '0.375rem',
         }}
       >
-        <Bell style={{ width: '1.125rem', height: '1.125rem', color: unreadCount > 0 ? 'var(--primary)' : 'var(--text-secondary)' }} />
-        <span style={{ fontSize: '0.75rem', fontWeight: 600, display: 'none' }} className="bell-label-desktop">
+        <Bell style={{ width: '1.125rem', height: '1.125rem', color: unreadCount > 0 ? 'var(--primary)' : 'var(--text-secondary)', flexShrink: 0 }} />
+        <span style={{ fontSize: '0.75rem', fontWeight: 600 }} className="bell-label-desktop">
+          Risk Alerts
+        </span>
+        <span style={{ fontSize: '0.75rem', fontWeight: 600 }} className="bell-label-mobile">
           Alerts
         </span>
 

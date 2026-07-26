@@ -660,6 +660,7 @@ button:focus-visible {
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   gap: 0.25rem;
+  max-width: 100%;
 }
 
 .nav-tab-btn {
@@ -689,6 +690,29 @@ button:focus-visible {
   background: var(--primary);
   color: #ffffff;
   box-shadow: 0 1px 4px rgba(99, 102, 241, 0.3);
+}
+
+/* Responsive Tab Labels */
+.tab-label-mobile {
+  display: none;
+}
+
+.tab-label-desktop {
+  display: inline;
+}
+
+.bell-label-mobile {
+  display: none;
+}
+
+.bell-label-desktop {
+  display: none;
+}
+
+@media (min-width: 1025px) {
+  .bell-label-desktop {
+    display: inline !important;
+  }
 }
 
 /* ===== Segmented Status Toggle Group ===== */
@@ -831,57 +855,6 @@ button:focus-visible {
   max-height: 420px;
 }
 
-/* Toast Container Floating Setup */
-.toast-container-wrapper {
-  position: fixed;
-  bottom: 1.25rem;
-  right: 1.25rem;
-  z-index: var(--z-toast);
-  display: flex;
-  flex-direction: column;
-  gap: 0.625rem;
-  max-width: 380px;
-  width: calc(100vw - 2.5rem);
-  pointer-events: none;
-}
-
-.toast-card {
-  pointer-events: auto;
-  background: #0f172a;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 0.875rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(8px);
-  animation: toastSlideUp 0.25s ease-out;
-}
-
-.toast-severity-critical {
-  border-left: 4px solid #f43f5e;
-  background: rgba(244, 63, 94, 0.08);
-}
-
-.toast-severity-warning {
-  border-left: 4px solid #f59e0b;
-  background: rgba(245, 158, 11, 0.08);
-}
-
-.toast-severity-recovery {
-  border-left: 4px solid #10b981;
-  background: rgba(16, 185, 129, 0.08);
-}
-
-@keyframes toastSlideUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@media (min-width: 1025px) {
-  .bell-label-desktop {
-    display: inline !important;
-  }
-}
-
 /* ========================================================= */
 /* COMPREHENSIVE RESPONSIVE ARCHITECTURE & MEDIA QUERIES      */
 /* ========================================================= */
@@ -928,6 +901,22 @@ button:focus-visible {
   .app-container {
     padding: 0.375rem;
     overflow-x: hidden;
+  }
+
+  .tab-label-desktop {
+    display: none !important;
+  }
+
+  .tab-label-mobile {
+    display: inline !important;
+  }
+
+  .bell-label-desktop {
+    display: none !important;
+  }
+
+  .bell-label-mobile {
+    display: inline !important;
   }
 
   .notif-panel-container {
@@ -987,20 +976,32 @@ button:focus-visible {
 
   .app-header-actions {
     width: 100%;
-    flex-wrap: wrap;
-    justify-content: space-between !important;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.375rem !important;
+    flex-wrap: wrap !important;
   }
 
   .nav-tab-group {
     flex: 1;
     display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
   }
 
   .nav-tab-btn {
     flex: 1;
     justify-content: center;
-    padding: 0.5rem 0.25rem;
+    padding: 0.4375rem 0.25rem;
     font-size: 0.75rem;
+    white-space: nowrap;
+    min-width: 0;
   }
 
   .kpi-grid {
@@ -1118,17 +1119,36 @@ button:focus-visible {
   .drawer-summary-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .nav-tab-btn {
+    padding: 0.375rem 0.1875rem;
+    font-size: 0.71875rem;
+  }
 }
 
-/* Extra Small Phones (≤ 480px) */
-@media (max-width: 480px) {
+/* Extra Small Phones (≤ 420px) */
+@media (max-width: 420px) {
   .app-header-actions {
-    flex-direction: column;
-    gap: 0.5rem;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 0.5rem !important;
   }
 
-  .app-header-actions .btn {
-    width: 100%;
+  .nav-tab-group {
+    width: 100% !important;
+    display: flex !important;
+  }
+
+  .nav-tab-btn {
+    flex: 1 !important;
+    justify-content: center !important;
+    padding: 0.4375rem 0.125rem !important;
+    font-size: 0.71875rem !important;
+  }
+
+  .notif-bell-btn {
+    width: 100% !important;
+    justify-content: center !important;
   }
 
   .kpi-grid {
@@ -1161,10 +1181,5 @@ button:focus-visible {
   .class-pill {
     padding: 0.3125rem 0.625rem;
     font-size: 0.75rem;
-  }
-
-  .nav-tab-btn {
-    font-size: 0.75rem;
-    padding: 0.375rem 0.25rem;
   }
 }

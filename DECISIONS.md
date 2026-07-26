@@ -136,3 +136,39 @@ During verification of the Early Warning Notification Center, 34 pre-seeded At-R
 - Solves cold-start notification absence: teachers instantly see existing At-Risk students upon launching the register.
 - Solves CSS stacking context clipping permanently: portals guarantee top-level viewport rendering across all browsers.
 - 100% verified via Playwright end-to-end testing with 0 build errors.
+
+## [2026-07-26] Toast Alert Popup Removal & Navigation Wording Optimization
+
+### Context
+User feedback requested removing the floating popup toast alert notifications that stacked up at the bottom-right/right edge of the viewport. Notifications should reside exclusively within the top-level Notification Bell dropdown and Early Warning Center. Furthermore, navigation tab labels were generic (`Workspace`, `History Log`, `Early Warning`, `Alerts`).
+
+### Key Architectural Decisions
+1. **Toast Removal**: Removed `<NotificationToastContainer />` from `App.tsx` and removed toast state generation logic from `useNotifications.ts`. Notifications are now accessed strictly via the `Risk Alerts` notification bell dropdown and `Early Warning Center` tab without intrusive popups.
+2. **Navigation Wording Optimization**:
+   - `Workspace` → `Daily Register` (denotes daily attendance roll-call marking).
+   - `History Log` → `Attendance History` (formal title for historical log audit).
+   - `Early Warning` → `Early Warning Center` (authoritative title for dropout risk dashboard).
+   - `Alerts` → `Risk Alerts` (explicitly labels the notification bell counter).
+   - Brand Subtitle → `Smart school attendance & 30-day early-warning register`.
+
+### Rationale & Trade-offs
+- Eliminates visual clutter from floating popups.
+- Enhances clarity and professional terminology for SIH evaluation.
+- All build and type checks pass cleanly (`npm run build`).
+
+## [2026-07-26] Mobile Navigation Bar Responsive Architecture Fix
+
+### Context
+On narrow mobile viewports (≤ 420px), long navigation tab labels (`Early Warning Center`, `Attendance History`) caused text clipping (`Early Warning C...`) and tab button overlapping.
+
+### Key Architectural Decisions
+1. **Responsive Label Switcher (`.tab-label-desktop` / `.tab-label-mobile`)**:
+   - Desktop (> 768px): Renders full formal titles (`Daily Register`, `Attendance History`, `Early Warning Center`, `Risk Alerts`).
+   - Mobile (≤ 768px): Renders crisp concise titles (`Register`, `History`, `Warnings`, `Alerts`).
+2. **Mobile Flex Layout Strategy (`index.css`)**:
+   - On screens ≤ 420px, `app-header-actions` switches to vertical column flex. Row 1 renders the 3 tabs (`Register` | `History` | `Warnings`) spanning 100% width, while Row 2 renders `.notif-bell-btn` (`Alerts 14`) spanning 100% width.
+   - Prevents horizontal text clipping, overlapping, or horizontal scrolling across all mobile viewports (320px to 430px).
+
+### Rationale & Trade-offs
+- Solves text truncation and button clipping on all phone screens down to 320px width.
+- Verified across 320px, 360px, 375px, 768px, 1280px via Playwright browser testing.

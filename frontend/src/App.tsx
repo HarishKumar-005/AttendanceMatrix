@@ -19,6 +19,8 @@ export const App: React.FC = () => {
     setSelectedClassSection,
     selectedDate,
     setSelectedDate,
+    sessionSearch,
+    setSessionSearch,
     roster,
     sessionState,
     sessionLoading,
@@ -32,6 +34,7 @@ export const App: React.FC = () => {
     markAllPresent,
     saveCurrentSession,
     refetchSession,
+    updateStudentMobile,
 
     // History Domain State
     historyRecords,
@@ -122,6 +125,7 @@ export const App: React.FC = () => {
               activeDate={selectedDate}
               roster={roster}
               sessionState={sessionState}
+              sessionSearch={sessionSearch}
               isLoading={sessionLoading}
               isError={Boolean(sessionError)}
               errorMessage={sessionError}
@@ -130,6 +134,7 @@ export const App: React.FC = () => {
               saveSuccessMessage={saveSuccessMessage}
               onClassChange={setSelectedClassSection}
               onDateChange={setSelectedDate}
+              onSearchChange={setSessionSearch}
               onStatusToggle={toggleRosterStatus}
               onMarkAllPresent={markAllPresent}
               onSaveSession={saveCurrentSession}
@@ -178,6 +183,7 @@ export const App: React.FC = () => {
           classSection={selectedStudentClassSection}
           onClose={clearStudentSelection}
           onEditRecord={openEditModal}
+          onUpdateMobile={updateStudentMobile}
         />
       </main>
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { X, Loader2, AlertTriangle, RefreshCw, Edit2 } from 'lucide-react';
-import { AttendanceRecord, StudentSummary, fetchStudentSummary, fetchRecords } from '../api/client';
+import { X, Loader2, AlertTriangle, RefreshCw, Edit2, Phone, Check } from 'lucide-react';
+import { AttendanceRecord, StudentSummary, fetchStudentSummary, fetchRecords, updateStudentMobileNumber } from '../api/client';
 
 interface StudentWorkspaceDrawerProps {
   studentId: string | null;
@@ -9,6 +9,7 @@ interface StudentWorkspaceDrawerProps {
   classSection: string;
   onClose: () => void;
   onEditRecord: (record: AttendanceRecord) => void;
+  onUpdateMobile?: (studentId: string, mobileNumber: string) => Promise<void>;
 }
 
 type DrawerState = 'loading' | 'error' | 'success';
@@ -20,11 +21,17 @@ export const StudentWorkspaceDrawer: React.FC<StudentWorkspaceDrawerProps> = ({
   classSection,
   onClose,
   onEditRecord,
+  onUpdateMobile,
 }) => {
   const [summary, setSummary] = useState<StudentSummary | null>(null);
   const [recentRecords, setRecentRecords] = useState<AttendanceRecord[]>([]);
   const [drawerState, setDrawerState] = useState<DrawerState>('loading');
   const [errorMessage, setErrorMessage] = useState('');
+
+  // Mobile Number inline editing state
+  const [isEditingMobile, setIsEditingMobile] = useState(false);
+  const [mobileInput, setMobileInput] = useState('');
+  const [isSavingMobile, setIsSavingMobile] = useState(false);
 
   const isOpen = studentId !== null;
 
@@ -32,6 +39,8 @@ export const StudentWorkspaceDrawer: React.FC<StudentWorkspaceDrawerProps> = ({
     if (!studentId) {
       setSummary(null);
       setRecentRecords([]);
+      setIsEditingMobile(false);
+      setMobileInput('');
       return;
     }
 
@@ -47,6 +56,7 @@ export const StudentWorkspaceDrawer: React.FC<StudentWorkspaceDrawerProps> = ({
 
         if (!cancelled) {
           setSummary(sumData);
+          setMobileInput(sumData?.mobile_number || '');
           setRecentRecords(historyData?.records || []);
           setDrawerState('success');
         }
@@ -72,6 +82,7 @@ export const StudentWorkspaceDrawer: React.FC<StudentWorkspaceDrawerProps> = ({
       ])
         .then(([sumData, historyData]) => {
           setSummary(sumData);
+          setMobileInput(sumData?.mobile_number || '');
           setRecentRecords(historyData?.records || []);
           setDrawerState('success');
         })
@@ -80,6 +91,25 @@ export const StudentWorkspaceDrawer: React.FC<StudentWorkspaceDrawerProps> = ({
           setErrorMessage(msg);
           setDrawerState('error');
         });
+    }
+  };
+
+  const handleSaveMobile = async () => {
+    if (!studentId) return;
+    setIsSavingMobile(true);
+    try {
+      if (onUpdateMobile) {
+        await onUpdateMobile(studentId, mobileInput.trim());
+      } else {
+        await updateStudentMobileNumber(studentId, mobileInput.trim());
+      }
+      setSummary((prev) => prev ? { ...prev, mobile_number: mobileInput.trim() || null } : null);
+      setIsEditingMobile(false);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to save mobile number';
+      alert(msg);
+    } finally {
+      setIsSavingMobile(false);
     }
   };
 
@@ -176,18 +206,86 @@ export const StudentWorkspaceDrawer: React.FC<StudentWorkspaceDrawerProps> = ({
                 </div>
               </div>
 
-              {/* Key Metrics */}
+              {/* Key Metrics & Mobile Number */}
               <div className="drawer-metrics">
+                {/* Mobile Number Row */}
+                <div className="drawer-metric-row" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '0.375rem', padding: '0.5rem 0' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                    <span className="drawer-metric-label" style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+                      <Phone style={{ width: '0.875rem', height: '0.875rem', color: 'var(--primary)' }} />
+                      Mobile Number
+                    </span>
+                    {!isEditingMobile && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span className="drawer-metric-value" style={{ fontWeight: 600, color: summary.mobile_number ? 'var(--text-primary)' : 'var(--text-muted)' }}>
+                          {summary.mobile_number || 'Not set'}
+                        </span>
+                        <button
+                          type="button"
+                          className="btn btn-secondary"
+                          onClick={() => setIsEditingMobile(true)}
+                          style={{ padding: '0.25rem 0.375rem', fontSize: '0.6875rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+                          title="Edit Mobile Number"
+                        >
+                          <Edit2 style={{ width: '0.75rem', height: '0.75rem' }} />
+                          Edit
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {isEditingMobile && (
+                    <div style={{ display: 'flex', gap: '0.375rem', width: '100%', marginTop: '0.25rem' }}>
+                      <input
+                        type="tel"
+                        className="input-control"
+                        placeholder="e.g. 9876543210"
+                        value={mobileInput}
+                        onChange={(e) => setMobileInput(e.target.value)}
+                        style={{ fontSize: '0.8125rem', height: '2rem', flex: 1 }}
+                        autoFocus
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={handleSaveMobile}
+                        disabled={isSavingMobile}
+                        style={{ padding: '0.25rem 0.625rem', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+                      >
+                        {isSavingMobile ? (
+                          <Loader2 style={{ width: '0.75rem', height: '0.75rem', animation: 'spin 1s linear infinite' }} />
+                        ) : (
+                          <Check style={{ width: '0.75rem', height: '0.75rem' }} />
+                        )}
+                        Save
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={() => {
+                          setIsEditingMobile(false);
+                          setMobileInput(summary.mobile_number || '');
+                        }}
+                        style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
+                </div>
+
                 <div className="drawer-metric-row">
                   <span className="drawer-metric-label">30-Day Absences</span>
                   <span className="drawer-metric-value" style={{ color: absences30d >= threshold ? 'var(--absent)' : 'var(--text-primary)' }}>
                     {absences30d} / {threshold}
                   </span>
                 </div>
+
                 <div className="drawer-metric-row">
                   <span className="drawer-metric-label">Attendance Rate</span>
                   <span className="drawer-metric-value">{rateStr}</span>
                 </div>
+
                 <div className="drawer-metric-row">
                   <span className="drawer-metric-label">Dropout Risk Status</span>
                   <span className={`badge ${summary.is_defaulter ? 'badge-warning' : 'badge-present'}`}>

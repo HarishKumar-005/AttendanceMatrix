@@ -11,6 +11,7 @@ interface AttendanceWorkspaceProps {
   activeDate: string;
   roster: StudentRosterEntry[];
   sessionState: SessionLifecycle;
+  sessionSearch?: string;
   isLoading: boolean;
   isError: boolean;
   errorMessage?: string | null;
@@ -19,6 +20,7 @@ interface AttendanceWorkspaceProps {
   saveSuccessMessage?: string | null;
   onClassChange: (cls: string) => void;
   onDateChange: (date: string) => void;
+  onSearchChange?: (query: string) => void;
   onStatusToggle: (studentId: string, status: AttendanceStatus) => void;
   onMarkAllPresent: () => void;
   onSaveSession: () => void;
@@ -32,6 +34,7 @@ export const AttendanceWorkspace: React.FC<AttendanceWorkspaceProps> = ({
   activeDate,
   roster,
   sessionState,
+  sessionSearch = '',
   isLoading,
   isError,
   errorMessage,
@@ -40,6 +43,7 @@ export const AttendanceWorkspace: React.FC<AttendanceWorkspaceProps> = ({
   saveSuccessMessage,
   onClassChange,
   onDateChange,
+  onSearchChange,
   onStatusToggle,
   onMarkAllPresent,
   onSaveSession,
@@ -71,6 +75,8 @@ export const AttendanceWorkspace: React.FC<AttendanceWorkspaceProps> = ({
         absentCount={absentCount}
         excusedCount={excusedCount}
         sessionState={sessionState}
+        searchQuery={sessionSearch}
+        onSearchChange={onSearchChange}
         onMarkAllPresent={onMarkAllPresent}
       />
 

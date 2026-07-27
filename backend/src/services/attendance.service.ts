@@ -1,8 +1,22 @@
 import { supabase } from '../config/db.js';
 import { AppError } from '../middleware/error-handler.js';
 import { recalculationService } from './recalculation.service.js';
-import { AttendanceRecord, StudentSummary } from '../types/index.js';
-import { CreateAttendanceInput, UpdateAttendanceInput, GetRecordsQueryInput } from '../schemas/attendance.schema.js';
+import { AttendanceRecord, StudentSummary, AttendanceStatus } from '../types/index.js';
+import { UpdateAttendanceInput, GetRecordsQueryInput } from '../schemas/attendance.schema.js';
+
+/**
+ * Canonical service-level input for creating a record.
+ * Controller resolves student_code → student_id before calling the service.
+ */
+export interface ResolvedCreateInput {
+  student_id: string;
+  attendance_date: string;
+  status: AttendanceStatus;
+  reason?: string | null;
+  marked_by?: string | null;
+  class_section?: string;
+  student_name_snapshot?: string;
+}
 
 export interface GetRecordsResult {
   records: AttendanceRecord[];
@@ -123,7 +137,7 @@ export class AttendanceService {
   /**
    * Creates a new attendance record, triggers 30-day recalculation, and returns record + updated summary.
    */
-  public async createRecord(data: CreateAttendanceInput): Promise<RecordMutationResult> {
+  public async createRecord(data: ResolvedCreateInput): Promise<RecordMutationResult> {
     // 1. Verify student exists in student master table
     const { data: student, error: studentError } = await supabase
       .from('students')

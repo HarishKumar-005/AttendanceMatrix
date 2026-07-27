@@ -172,3 +172,24 @@ On narrow mobile viewports (≤ 420px), long navigation tab labels (`Early Warni
 ### Rationale & Trade-offs
 - Solves text truncation and button clipping on all phone screens down to 320px width.
 - Verified across 320px, 360px, 375px, 768px, 1280px via Playwright browser testing.
+
+## [2026-07-27] Level 2 Features: Mobile Number Field & Server-Side Search
+
+### Context
+Level 2 requirements specified adding persistent `Mobile Number` support to student master records and implementing case-insensitive **Server-Side Search** on the Daily Register.
+
+### Key Architectural Decisions
+1. **ADR-09: Mobile Number Persistence in Student Master**:
+   - Created SQL migration `03_add_mobile_number.sql` adding `mobile_number text` column to `public.students`.
+   - Updated Zod validation schemas (`studentSchema`, `updateStudentSchema`, `createRecordSchema`), DTO interfaces, and `PUT /api/students/:id` Express endpoint.
+   - Added self-healing schema fallback in backend controller and service to automatically map `guardian_phone` / `mobile_number` when operating against unmigrated database instances.
+   - Exposed inline **Edit Mobile Number** in `StudentWorkspaceDrawer.tsx` and displayed `📞 Mobile Number` in roster rows and student details. Verified values save to DB and persist through page reload.
+2. **ADR-10: Daily Register Server-Side Search**:
+   - Extended `GET /api/attendance/session` query schema with optional `search` parameter.
+   - Implemented case-insensitive server-side `ilike` filtering in `AttendanceSessionService.getSession()` searching `full_name`, `student_code`, `mobile_number`, and `guardian_phone`.
+   - Added a search input box in `AttendanceSessionBar.tsx` with a 300ms debounce to prevent API request spamming, clear button (`X`), and empty state handling (`No records found`).
+
+### Rationale & Trade-offs
+- 100% 3-tier isolation maintained. The browser sends query parameters (`search=...`) and backend handles SQL-level filtering.
+- Zero client-side filtering. Empty matches produce a clean `0 Enrolled` empty state.
+- All type checks (`tsc --noEmit`) and production builds (`npm run build`) pass cleanly.

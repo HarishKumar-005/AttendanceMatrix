@@ -178,3 +178,23 @@ All notable changes to the AttendanceMatrix project are documented here in appen
 - Frontend Build: 219.27 KB (gzip: 61.75 KB)
 - Zero TypeScript compiler errors, zero build warnings.
 - Verified across 320px, 360px, 375px, 768px, 1280px viewports via Playwright browser testing.
+
+## [2026-07-27] Level 2 Features Implementation
+
+### Added
+- **Database Migration**: Created [`03_add_mobile_number.sql`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/supabase/migrations/03_add_mobile_number.sql) adding `mobile_number text` column to `public.students`.
+- **Backend API & Self-Healing**:
+  - Updated [`attendance.schema.ts`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/backend/src/schemas/attendance.schema.ts) with `updateStudentSchema` and `search` query parameter support.
+  - Added `PUT /api/students/:id` endpoint in [`students.routes.ts`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/backend/src/routes/students.routes.ts) & [`students.controller.ts`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/backend/src/controllers/students.controller.ts).
+  - Implemented self-healing column fallback logic mapping `mobile_number` and `guardian_phone` automatically.
+- **Daily Register Server-Side Search**:
+  - Implemented server-side `ilike` search in [`AttendanceSessionService.getSession()`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/backend/src/services/attendance-session.service.ts) matching student name, student code, and mobile number.
+  - Created debounced search input bar with clear (`X`) button in [`AttendanceSessionBar.tsx`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/frontend/src/components/AttendanceSessionBar.tsx).
+- **Mobile Number UI**:
+  - Added inline **Edit Mobile Number** in [`StudentWorkspaceDrawer.tsx`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/frontend/src/components/StudentWorkspaceDrawer.tsx).
+  - Displayed `📞 Mobile Number` in [`StudentRoster.tsx`](file:///d:/Hackathons/SIH%2026/The%20Project/AttendanceMatrix/frontend/src/components/StudentRoster.tsx).
+
+### Metrics
+- Frontend Build: 223.63 KB (gzip: 62.70 KB)
+- Zero TypeScript compiler errors across all packages.
+- Verified in Playwright browser: Mobile Number saved to DB and persisted through page reload; Daily Register search executed server-side for name, code, mobile number, empty state, and clear reset.

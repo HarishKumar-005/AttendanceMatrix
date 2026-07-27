@@ -67,6 +67,7 @@ export interface Student {
   roll_number: string | null;
   guardian_name: string | null;
   guardian_phone: string | null;
+  mobile_number?: string | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -122,6 +123,7 @@ export interface StudentSummary {
   student_name: string;
   student_code?: string;
   class_section: string;
+  mobile_number?: string | null;
   evaluation_date: string;
   window_start: string;
   window_end: string;
@@ -161,6 +163,7 @@ export type Database = {
           roll_number: string | null;
           guardian_name: string | null;
           guardian_phone: string | null;
+          mobile_number: string | null;
           is_active: boolean;
           created_at: string;
           updated_at: string;
@@ -173,6 +176,7 @@ export type Database = {
           roll_number?: string | null;
           guardian_name?: string | null;
           guardian_phone?: string | null;
+          mobile_number?: string | null;
           is_active?: boolean;
           created_at?: string;
           updated_at?: string;
@@ -185,6 +189,7 @@ export type Database = {
           roll_number?: string | null;
           guardian_name?: string | null;
           guardian_phone?: string | null;
+          mobile_number?: string | null;
           is_active?: boolean;
           created_at?: string;
           updated_at?: string;

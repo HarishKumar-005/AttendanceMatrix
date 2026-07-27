@@ -8,6 +8,7 @@ export const studentSchema = z.object({
   roll_number: z.string().nullable().optional(),
   guardian_name: z.string().nullable().optional(),
   guardian_phone: z.string().nullable().optional(),
+  mobile_number: z.string().nullable().optional(),
   is_active: z.boolean().default(true),
 });
 

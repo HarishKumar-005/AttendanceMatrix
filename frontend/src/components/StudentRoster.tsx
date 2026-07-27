@@ -85,6 +85,11 @@ export const StudentRoster: React.FC<StudentRosterProps> = ({
                         <div style={{ fontWeight: 600, fontSize: '0.8125rem', color: 'var(--text-primary)' }}>
                           {student.student_name}
                         </div>
+                        {student.mobile_number && (
+                          <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }}>
+                            📞 {student.mobile_number}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </td>

@@ -59,6 +59,7 @@ export interface StudentRosterEntry {
   student_code: string;
   student_name: string;
   class_section: string;
+  mobile_number?: string | null;
   status: AttendanceStatus;
   is_defaulter: boolean;
   record_id?: string | null;
@@ -113,6 +114,7 @@ export interface StudentSummary {
   student_name: string;
   student_code?: string;
   class_section: string;
+  mobile_number?: string | null;
   total_days?: number;
   present_count?: number;
   absent_count?: number;
@@ -223,12 +225,16 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
  */
 export async function fetchAttendanceSession(
   classSection: string,
-  date: string
+  date: string,
+  search?: string
 ): Promise<AttendanceSession> {
   const query = new URLSearchParams({
     class_section: classSection,
     date,
   });
+  if (search && search.trim().length > 0) {
+    query.append('search', search.trim());
+  }
   return request<AttendanceSession>(`/attendance/session?${query.toString()}`);
 }
 
@@ -300,6 +306,19 @@ export async function updateRecord(id: string, payload: UpdateRecordPayload): Pr
 export async function fetchStudentSummary(studentId: string): Promise<StudentSummary> {
   return request<StudentSummary>(`/students/${studentId}/summary`, {
     method: 'GET',
+  });
+}
+
+/**
+ * Update a student's profile information (e.g. mobile number) in the students table.
+ */
+export async function updateStudentMobileNumber(
+  studentId: string,
+  mobileNumber: string
+): Promise<{ id: string; mobile_number: string | null }> {
+  return request<{ id: string; mobile_number: string | null }>(`/students/${studentId}`, {
+    method: 'PUT',
+    body: JSON.stringify({ mobile_number: mobileNumber }),
   });
 }
 

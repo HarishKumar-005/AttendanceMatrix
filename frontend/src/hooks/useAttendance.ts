@@ -13,6 +13,7 @@ import {
   fetchRecords,
   createRecord,
   updateRecord,
+  updateStudentMobileNumber,
 } from '../api/client';
 
 const initialMetrics: SummaryMetrics = {
@@ -44,6 +45,7 @@ export function useAttendance() {
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [session, setSession] = useState<AttendanceSession | null>(null);
   const [roster, setRoster] = useState<StudentRosterEntry[]>([]);
+  const [sessionSearch, setSessionSearch] = useState<string>('');
   const [sessionState, setSessionState] = useState<SessionLifecycle>('clean');
   const [sessionLoading, setSessionLoading] = useState<boolean>(true);
   const [sessionError, setSessionError] = useState<string | null>(null);
@@ -65,13 +67,13 @@ export function useAttendance() {
   const [selectedStudentCode, setSelectedStudentCode] = useState('');
   const [selectedStudentClassSection, setSelectedStudentClassSection] = useState('');
 
-  // 1. Load Attendance Session for active class & date
-  const loadSession = useCallback(async (classSection: string, date: string) => {
+  // 1. Load Attendance Session for active class & date (with optional server-side search)
+  const loadSession = useCallback(async (classSection: string, date: string, search?: string) => {
     setSessionLoading(true);
     setSessionError(null);
     setSaveSuccessMessage(null);
     try {
-      const data = await fetchAttendanceSession(classSection, date);
+      const data = await fetchAttendanceSession(classSection, date, search);
       setSession(data);
       setRoster(data.roster || []);
       setSessionState('clean');
@@ -105,10 +107,10 @@ export function useAttendance() {
     }
   }, []);
 
-  // Load session when class or date changes
+  // Load session when class, date, or search changes
   useEffect(() => {
-    loadSession(selectedClassSection, selectedDate);
-  }, [selectedClassSection, selectedDate, loadSession]);
+    loadSession(selectedClassSection, selectedDate, sessionSearch);
+  }, [selectedClassSection, selectedDate, sessionSearch, loadSession]);
 
   // Load history when tab is 'history' or filters change
   useEffect(() => {
@@ -261,6 +263,8 @@ export function useAttendance() {
     setSelectedClassSection,
     selectedDate,
     setSelectedDate,
+    sessionSearch,
+    setSessionSearch,
     session,
     roster,
     sessionState,
@@ -274,7 +278,11 @@ export function useAttendance() {
     toggleRosterStatus,
     markAllPresent,
     saveCurrentSession,
-    refetchSession: () => loadSession(selectedClassSection, selectedDate),
+    refetchSession: () => loadSession(selectedClassSection, selectedDate, sessionSearch),
+    updateStudentMobile: async (studentId: string, mobileNumber: string) => {
+      await updateStudentMobileNumber(studentId, mobileNumber);
+      await loadSession(selectedClassSection, selectedDate, sessionSearch);
+    },
 
     // History Audit Domain State
     historyRecords,

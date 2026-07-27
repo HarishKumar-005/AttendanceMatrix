@@ -9,6 +9,7 @@ export interface StudentRosterEntry {
   student_code: string;
   student_name: string;
   class_section: string;
+  mobile_number?: string | null;
   status: 'present' | 'absent' | 'excused';
   is_defaulter: boolean;
   record_id?: string | null;
@@ -52,13 +53,39 @@ export class AttendanceSessionService {
       `Class ${withHyphen}`
     ]));
 
-    // 1. Fetch enrolled active students for this class section
-    const { data: students, error: studentsError } = await supabase
+    // 1. Fetch enrolled active students for this class section (with optional server-side search)
+    let studentsQuery = supabase
       .from('students')
       .select('*')
       .in('current_class_section', classVariants)
-      .eq('is_active', true)
-      .order('full_name');
+      .eq('is_active', true);
+
+    if (query.search && query.search.trim().length > 0) {
+      const term = `%${query.search.trim()}%`;
+      studentsQuery = studentsQuery.or(`full_name.ilike.${term},student_code.ilike.${term},mobile_number.ilike.${term},guardian_phone.ilike.${term}`);
+    }
+
+    studentsQuery = studentsQuery.order('full_name');
+
+    let { data: students, error: studentsError } = await studentsQuery;
+
+    if (studentsError && (studentsError.code === '42703' || studentsError.code === 'PGRST204')) {
+      let fallbackQuery = supabase
+        .from('students')
+        .select('*')
+        .in('current_class_section', classVariants)
+        .eq('is_active', true);
+
+      if (query.search && query.search.trim().length > 0) {
+        const term = `%${query.search.trim()}%`;
+        fallbackQuery = fallbackQuery.or(`full_name.ilike.${term},student_code.ilike.${term},guardian_phone.ilike.${term}`);
+      }
+
+      fallbackQuery = fallbackQuery.order('full_name');
+      const res = await fallbackQuery;
+      students = res.data;
+      studentsError = res.error;
+    }
 
     if (studentsError) {
       console.error('[AttendanceSessionService.getSession] Failed to fetch students:', studentsError);
@@ -122,6 +149,7 @@ export class AttendanceSessionService {
         student_code: student.student_code,
         student_name: student.full_name,
         class_section: student.current_class_section,
+        mobile_number: student.mobile_number || student.guardian_phone || null,
         status,
         is_defaulter: defaulterMap.get(student.id) || false,
         record_id: existing ? existing.id : null,

@@ -19,7 +19,7 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
 
   const [studentName, setStudentName] = useState('');
   const [studentCode, setStudentCode] = useState('');
-  const [classSection, setClassSection] = useState('Class 9-A');
+  const [classSection, setClassSection] = useState('8A');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [status, setStatus] = useState<AttendanceStatus>('present');
   const [remarks, setRemarks] = useState('');
@@ -39,7 +39,7 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
     } else {
       setStudentName('');
       setStudentCode('');
-      setClassSection('Class 9-A');
+      setClassSection('8A');
       setDate(new Date().toISOString().split('T')[0]);
       setStatus('present');
       setRemarks('');
@@ -187,12 +187,11 @@ export const AttendanceForm: React.FC<AttendanceFormProps> = ({
                 value={classSection}
                 onChange={(e) => setClassSection(e.target.value)}
               >
-                <option value="Class 9-A">Class 9-A</option>
-                <option value="Class 9-B">Class 9-B</option>
-                <option value="Class 10-A">Class 10-A</option>
-                <option value="Class 10-B">Class 10-B</option>
-                <option value="Class 11-A">Class 11-A</option>
-                <option value="Class 12-A">Class 12-A</option>
+                <option value="8A">Class 8-A</option>
+                <option value="8B">Class 8-B</option>
+                <option value="9A">Class 9-A</option>
+                <option value="9B">Class 9-B</option>
+                <option value="10A">Class 10-A</option>
               </select>
             </div>
           </div>
